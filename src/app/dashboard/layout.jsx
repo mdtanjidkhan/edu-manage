@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   FiHome, FiUsers, FiCalendar, FiDollarSign, 
   FiSettings, FiLogOut, FiBell, FiUser, FiBookOpen, 
-  FiAward, FiCheckSquare, FiClock, FiFileText 
+  FiAward, FiCheckSquare, FiClock, FiFileText, FiShield
 } from "react-icons/fi";
 
 export default function DashboardLayout({ children }) {
@@ -40,10 +40,12 @@ export default function DashboardLayout({ children }) {
   // Admin Menu
   const adminMenuItems = [
     { name: "Dashboard", href: "/dashboard/admin", icon: FiHome },
+    { name: "Users & Roles", href: "/dashboard/admin/users", icon: FiShield },
     { name: "Students", href: "/dashboard/admin/students", icon: FiUsers },
     { name: "Teachers", href: "/dashboard/admin/teachers", icon: FiUsers },
     { name: "Attendance", href: "/dashboard/admin/attendance", icon: FiCalendar },
     { name: "Fees & Accounts", href: "/dashboard/admin/fees", icon: FiDollarSign },
+    { name: "Notice Board", href: "/dashboard/admin/notices", icon: FiBell },
     { name: "Settings", href: "/dashboard/admin/settings", icon: FiSettings },
   ];
 
