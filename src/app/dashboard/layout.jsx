@@ -6,19 +6,19 @@ import Link from "next/link";
 import { 
   FiHome, FiUsers, FiCalendar, FiDollarSign, 
   FiSettings, FiLogOut, FiBell, FiUser, FiBookOpen, 
-  FiAward, FiCheckSquare, FiClock, FiFileText, FiShield
+  FiAward, FiCheckSquare, FiClock, FiFileText, FiShield,
 } from "react-icons/fi";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
-  const pathname = usePathname(); // কারেন্ট পেজের রাউট জানার জন্য
+  const pathname = usePathname(); 
   
-  // ১. Better Auth থেকে সেশন ডাটা এবং লোডিং স্টেট নেওয়া
+  // ১. Better Auth 
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
-  const userRole = user?.role || "student"; // ডিফল্ট রোল 'student'
+  const userRole = user?.role || "student"; 
 
-  // ২. Logout হ্যান্ডলার
+  // ২. Logout 
   const handleLogout = async () => {
     await authClient.signOut({
       fetchOptions: {
@@ -29,7 +29,6 @@ export default function DashboardLayout({ children }) {
     });
   };
 
-  // মোবাইল ড্রয়ার বন্ধ করার ফাংশন
   const closeDrawer = () => {
     const drawerCheckbox = document.getElementById("dashboard-drawer");
     if (drawerCheckbox) {
@@ -43,6 +42,7 @@ export default function DashboardLayout({ children }) {
     { name: "Users & Roles", href: "/dashboard/admin/users", icon: FiShield },
     { name: "Students", href: "/dashboard/admin/students", icon: FiUsers },
     { name: "Teachers", href: "/dashboard/admin/teachers", icon: FiUsers },
+    { name: "Routine", href: "/dashboard/admin/routine", icon: FiClock },
     { name: "Attendance", href: "/dashboard/admin/attendance", icon: FiCalendar },
     { name: "Fees & Accounts", href: "/dashboard/admin/fees", icon: FiDollarSign },
     { name: "Notice Board", href: "/dashboard/admin/notices", icon: FiBell },
@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }) {
     { name: "Pay Fees", href: "/dashboard/student/fees", icon: FiDollarSign },
   ];
 
-  // রোল অনুযায়ী মেনু নির্বাচন
+  // role menu
   const getMenuItems = () => {
     if (userRole === "admin") return adminMenuItems;
     if (userRole === "teacher") return teacherMenuItems;
@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }) {
 
   const currentMenu = getMenuItems();
 
-  // সেশন লোড হওয়া পর্যন্ত স্পিনার দেখানো
+  //
   if (isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200">
@@ -172,14 +172,14 @@ export default function DashboardLayout({ children }) {
               <ul className="flex flex-col gap-1.5">
                 {currentMenu.map((item) => {
                   const Icon = item.icon;
-                  // কারেন্ট পেজের সাথে লিঙ্ক এক্সেক্ট ম্যাচ করছে কি না
+                  //
                   const isActive = pathname === item.href;
 
                   return (
                     <li key={item.name}>
                       <Link 
                         href={item.href} 
-                        onClick={closeDrawer} // মোবাইলে ক্লিকে ড্রয়ার বন্ধ হবে
+                        onClick={closeDrawer} 
                         className={`group flex items-center gap-3.5 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 ${
                           isActive 
                             ? "bg-primary text-primary-content font-semibold shadow-md shadow-primary/25" 

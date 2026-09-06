@@ -88,7 +88,7 @@ export default function ManageStudentsPage() {
     setIsModalOpen(true);
   };
 
-  // Edit modal ওপেন করার জন্য
+  // Edit modal 
   const handleOpenEditModal = (student) => {
     setIsEditMode(true);
     setEditingStudentId(student._id);
@@ -105,7 +105,7 @@ export default function ManageStudentsPage() {
     setIsModalOpen(true);
   };
 
-  // ২. স্টুডেন্ট ক্রিয়েট অথবা আপডেট হ্যান্ডলার (POST / PUT)
+  // ২.post / put 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -144,7 +144,7 @@ export default function ManageStudentsPage() {
     }
   };
 
-  // ৩. স্টুডেন্ট ডিলিট হ্যান্ডলার (DELETE)
+  // ৩.  (DELETE)
   const handleDeleteStudent = async () => {
     if (!deleteCandidate) return;
     setIsSubmitting(true);
@@ -169,7 +169,7 @@ export default function ManageStudentsPage() {
     }
   };
 
-  // ৪. ফিল্টারিং লজিক (Search & Class Filter)
+  // ৪.  (Search & Class Filter)
   const filteredStudents = students.filter((student) => {
     const matchesSearch = 
       student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
