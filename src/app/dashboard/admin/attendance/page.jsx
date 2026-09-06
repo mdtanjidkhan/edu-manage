@@ -16,7 +16,7 @@ export default function AdminAttendancePage() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [selectedDept, setSelectedDept] = useState("All");
+  const [selectedSubject, setSelectedSubject] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [studentRecords, setStudentRecords] = useState([]);
   const [teacherRecords, setTeacherRecords] = useState([]);
@@ -26,9 +26,10 @@ export default function AdminAttendancePage() {
   const fetchAttendance = async () => {
     setLoading(true);
     try {
+      // API call param -> subject
       const endpoint = activeTab === "students" 
-        ? `http://localhost:5000/api/admin/attendance/students?date=${selectedDate}&department=${selectedDept}`
-        : `http://localhost:5000/api/admin/attendance/teachers?date=${selectedDate}&department=${selectedDept}`;
+        ? `http://localhost:5000/api/admin/attendance/students?date=${selectedDate}&subject=${selectedSubject}`
+        : `http://localhost:5000/api/admin/attendance/teachers?date=${selectedDate}&subject=${selectedSubject}`;
 
       const res = await fetch(endpoint);
       const data = await res.json();
@@ -49,7 +50,22 @@ export default function AdminAttendancePage() {
 
   useEffect(() => {
     fetchAttendance();
-  }, [selectedDate, selectedDept, activeTab]);
+  }, [selectedDate, selectedSubject, activeTab]);
+
+  // Client-side search filtering
+  const filteredStudentRecords = studentRecords.filter((item) => {
+    const matchesSearch = 
+      item.subjectName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.teacherName?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
+
+  const filteredTeacherRecords = teacherRecords.filter((item) => {
+    const matchesSearch = 
+      item.teacherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.subject?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
 
   // Calculations for Student Stats
   const totalStudents = studentRecords.reduce((acc, curr) => acc + (curr.students?.length || 0), 0);
@@ -113,18 +129,20 @@ export default function AdminAttendancePage() {
             />
           </div>
 
-          {/* Department Filter */}
+          {/* Subject Filter */}
           <div className="w-full sm:w-auto">
             <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
               className="select select-bordered w-full rounded-xl text-sm focus:outline-none focus:border-primary"
             >
-              <option value="All">All Departments</option>
-              <option value="Electrical Technology">Electrical Tech</option>
-              <option value="Computer Technology">Computer Tech</option>
-              <option value="Civil Technology">Civil Tech</option>
-              <option value="Mechanical Technology">Mechanical Tech</option>
+              <option value="All">All Subjects</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="General Science">General Science</option>
+              <option value="English">English</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="ICT">ICT</option>
             </select>
           </div>
         </div>
@@ -196,17 +214,17 @@ export default function AdminAttendancePage() {
           </div>
         ) : activeTab === "students" ? (
           /* TAB 1: STUDENT ATTENDANCE TABLE */
-          studentRecords.length === 0 ? (
+          filteredStudentRecords.length === 0 ? (
             <div className="text-center p-12 text-base-content/60 space-y-2">
               <FiClock size={32} className="mx-auto text-base-content/30" />
-              <p className="font-semibold text-sm">No student attendance records for {selectedDate}.</p>
+              <p className="font-semibold text-sm">No student attendance records found.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="table w-full">
                 <thead className="bg-base-200/50 text-base-content/70 text-xs font-semibold uppercase">
                   <tr>
-                    <th>Subject & Department</th>
+                    <th>Subject</th>
                     <th>Teacher Name</th>
                     <th>Present / Total</th>
                     <th>Percentage</th>
@@ -214,7 +232,7 @@ export default function AdminAttendancePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-base-200 text-sm">
-                  {studentRecords.map((item, idx) => {
+                  {filteredStudentRecords.map((item, idx) => {
                     const present = item.students?.filter((s) => s.status === "Present").length || 0;
                     const total = item.students?.length || 0;
                     const percent = total > 0 ? Math.round((present / total) * 100) : 0;
@@ -223,7 +241,6 @@ export default function AdminAttendancePage() {
                       <tr key={item._id || idx} className="hover:bg-base-200/30 transition-colors">
                         <td>
                           <div className="font-bold text-base-content">{item.subjectName || "N/A"}</div>
-                          <div className="text-xs text-base-content/60">{item.department}</div>
                         </td>
                         <td>
                           <span className="font-semibold text-base-content/80">{item.teacherName || "N/A"}</span>
@@ -246,10 +263,10 @@ export default function AdminAttendancePage() {
           )
         ) : (
           /* TAB 2: TEACHER ATTENDANCE TABLE */
-          teacherRecords.length === 0 ? (
+          filteredTeacherRecords.length === 0 ? (
             <div className="text-center p-12 text-base-content/60 space-y-2">
               <FiClock size={32} className="mx-auto text-base-content/30" />
-              <p className="font-semibold text-sm">No teacher attendance records for {selectedDate}.</p>
+              <p className="font-semibold text-sm">No teacher attendance records found.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -257,17 +274,21 @@ export default function AdminAttendancePage() {
                 <thead className="bg-base-200/50 text-base-content/70 text-xs font-semibold uppercase">
                   <tr>
                     <th>Teacher Name</th>
-                    <th>Department</th>
+                    <th>Subject</th>
                     <th>Check In Time</th>
                     <th>Status</th>
                     <th>Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-base-200 text-sm">
-                  {teacherRecords.map((item, idx) => (
+                  {filteredTeacherRecords.map((item, idx) => (
                     <tr key={item._id || idx} className="hover:bg-base-200/30 transition-colors">
                       <td className="font-bold text-base-content">{item.teacherName}</td>
-                      <td className="text-xs text-base-content/60">{item.department}</td>
+                      <td>
+                        <span className="badge badge-ghost badge-sm font-medium">
+                          {item.subject || "N/A"}
+                        </span>
+                      </td>
                       <td className="text-xs font-mono">{item.checkInTime || "N/A"}</td>
                       <td>
                         <span className={`badge badge-sm font-bold ${

@@ -18,7 +18,7 @@ export default function ManageTeachersPage() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDept, setSelectedDept] = useState("All");
+  const [selectedSubject, setSelectedSubject] = useState("All");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -33,8 +33,8 @@ export default function ManageTeachersPage() {
     name: "",
     email: "",
     password: "",
-    designation: "Lecturer",
-    department: "Electrical Technology"
+    designation: "Assistant Teacher",
+    subject: "Mathematics"
   });
 
   const fetchTeachers = async () => {
@@ -66,8 +66,8 @@ export default function ManageTeachersPage() {
       name: "",
       email: "",
       password: "",
-      designation: "Lecturer",
-      department: "Electrical Technology"
+      designation: "Assistant Teacher",
+      subject: "Mathematics"
     });
     setFormError("");
     setFormSuccess("");
@@ -81,8 +81,8 @@ export default function ManageTeachersPage() {
       name: teacher.name || "",
       email: teacher.email || "",
       password: "",
-      designation: teacher.designation || "Lecturer",
-      department: teacher.department || "Electrical Technology"
+      designation: teacher.designation || "Assistant Teacher",
+      subject: teacher.subject || "Mathematics"
     });
     setFormError("");
     setFormSuccess("");
@@ -157,9 +157,9 @@ export default function ManageTeachersPage() {
       teacher.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.designation?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesDept = selectedDept === "All" || teacher.department === selectedDept;
+    const matchesSubject = selectedSubject === "All" || teacher.subject === selectedSubject;
 
-    return matchesSearch && matchesDept;
+    return matchesSearch && matchesSubject;
   });
 
   return (
@@ -171,7 +171,7 @@ export default function ManageTeachersPage() {
             <FiUserCheck className="text-secondary" /> Manage Teachers
           </h1>
           <p className="text-sm text-base-content/60 mt-1">
-            View, add, edit, and manage faculty members across departments.
+            View, add, edit, and manage faculty members.
           </p>
         </div>
         <button
@@ -197,18 +197,20 @@ export default function ManageTeachersPage() {
 
         <div className="flex items-center gap-2 w-full md:w-auto">
           <span className="text-xs font-semibold text-base-content/60 uppercase whitespace-nowrap">
-            Dept Filter:
+            Subject Filter:
           </span>
           <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
             className="select select-bordered w-full md:w-56 rounded-xl text-sm focus:outline-none focus:border-secondary"
           >
-            <option value="All">All Departments</option>
-            <option value="Electrical Technology">Electrical Technology</option>
-            <option value="Computer Technology">Computer Technology</option>
-            <option value="Civil Technology">Civil Technology</option>
-            <option value="Mechanical Technology">Mechanical Technology</option>
+            <option value="All">All Subjects</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="General Science">General Science</option>
+            <option value="English">English</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="ICT">ICT</option>
           </select>
         </div>
       </div>
@@ -231,7 +233,7 @@ export default function ManageTeachersPage() {
                 <tr>
                   <th>Faculty Info</th>
                   <th>Designation</th>
-                  <th>Department</th>
+                  <th>Subject</th>
                   <th>Joined Date</th>
                   <th className="text-right">Actions</th>
                 </tr>
@@ -254,12 +256,12 @@ export default function ManageTeachersPage() {
                     </td>
                     <td>
                       <span className="badge badge-secondary badge-outline badge-sm font-semibold">
-                        {teacher.designation || "Faculty"}
+                        {teacher.designation || "Teacher"}
                       </span>
                     </td>
                     <td>
                       <span className="badge badge-ghost badge-sm font-medium">
-                        {teacher.department || "General"}
+                        {teacher.subject || "General"}
                       </span>
                     </td>
                     <td className="text-xs text-base-content/60">
@@ -369,28 +371,29 @@ export default function ManageTeachersPage() {
                       onChange={handleInputChange}
                       className="select select-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-secondary"
                     >
-                      <option value="Lecturer">Lecturer</option>
-                      <option value="Senior Lecturer">Senior Lecturer</option>
-                      <option value="Assistant Professor">Assistant Professor</option>
-                      <option value="Head of Dept">Head of Dept</option>
+                      <option value="Assistant Teacher">Assistant Teacher</option>
+                      <option value="Senior Teacher">Senior Teacher</option>
+                      <option value="Head Teacher">Head Teacher</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Department</label>
+                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Subject</label>
                   <div className="relative">
                     <FiBookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
                     <select
-                      name="department"
-                      value={formData.department}
+                      name="subject"
+                      value={formData.subject}
                       onChange={handleInputChange}
                       className="select select-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-secondary"
                     >
-                      <option value="Electrical Technology">Electrical Tech</option>
-                      <option value="Computer Technology">Computer Tech</option>
-                      <option value="Civil Technology">Civil Tech</option>
-                      <option value="Mechanical Technology">Mechanical Tech</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="General Science">General Science</option>
+                      <option value="English">English</option>
+                      <option value="Physics">Physics</option>
+                      <option value="Chemistry">Chemistry</option>
+                      <option value="ICT">ICT</option>
                     </select>
                   </div>
                 </div>
@@ -407,7 +410,8 @@ export default function ManageTeachersPage() {
                     "Save Changes"
                   ) : (
                     "Create Teacher"
-                  )}
+                  )
+                  }
                 </button>
               </div>
             </form>

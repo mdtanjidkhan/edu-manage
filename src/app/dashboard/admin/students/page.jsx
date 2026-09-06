@@ -12,14 +12,15 @@ import {
   FiHash,
   FiX,
   FiEdit2,
-  FiTrash2
+  FiTrash2,
+  FiLayers
 } from "react-icons/fi";
 
 export default function ManageStudentsPage() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDept, setSelectedDept] = useState("All");
+  const [selectedClass, setSelectedClass] = useState("All");
 
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +37,8 @@ export default function ManageStudentsPage() {
     email: "",
     password: "",
     studentId: "",
-    department: "Electrical Technology"
+    class: "Class 6",
+    group: "General"
   });
 
   // ১. Express API থেকে স্টুডেন্ট লিস্ট লোড করা
@@ -59,7 +61,14 @@ export default function ManageStudentsPage() {
   }, []);
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Class 6-8 এর জন্য group স্বয়ংক্রিয়ভাবে General হবে
+    if (name === "class" && ["Class 6", "Class 7", "Class 8"].includes(value)) {
+      setFormData({ ...formData, class: value, group: "General" });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   // Add modal ওপেন করার জন্য
@@ -71,7 +80,8 @@ export default function ManageStudentsPage() {
       email: "",
       password: "",
       studentId: "",
-      department: "Electrical Technology"
+      class: "Class 6",
+      group: "General"
     });
     setFormError("");
     setFormSuccess("");
@@ -85,9 +95,10 @@ export default function ManageStudentsPage() {
     setFormData({
       name: student.name || "",
       email: student.email || "",
-      password: "", // পাসওয়ার্ড সাধারণত এডিটে ফিল ইন করা হয় না
+      password: "",
       studentId: student.studentId || "",
-      department: student.department || "Electrical Technology"
+      class: student.class || "Class 6",
+      group: student.group || "General"
     });
     setFormError("");
     setFormSuccess("");
@@ -158,16 +169,16 @@ export default function ManageStudentsPage() {
     }
   };
 
-  // ৪. ফিল্টারিং লজিক
+  // ৪. ফিল্টারিং লজিক (Search & Class Filter)
   const filteredStudents = students.filter((student) => {
     const matchesSearch = 
       student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesDept = selectedDept === "All" || student.department === selectedDept;
+    const matchesClass = selectedClass === "All" || student.class === selectedClass;
 
-    return matchesSearch && matchesDept;
+    return matchesSearch && matchesClass;
   });
 
   return (
@@ -179,7 +190,7 @@ export default function ManageStudentsPage() {
             <FiUsers className="text-primary" /> Manage Students
           </h1>
           <p className="text-sm text-base-content/60 mt-1">
-            View, add, edit, and manage enrolled students across departments.
+            View, add, edit, and manage enrolled students across classes (Class 6 - 10).
           </p>
         </div>
         <button
@@ -205,18 +216,19 @@ export default function ManageStudentsPage() {
 
         <div className="flex items-center gap-2 w-full md:w-auto">
           <span className="text-xs font-semibold text-base-content/60 uppercase whitespace-nowrap">
-            Dept Filter:
+            Class Filter:
           </span>
           <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
             className="select select-bordered w-full md:w-56 rounded-xl text-sm focus:outline-none focus:border-primary"
           >
-            <option value="All">All Departments</option>
-            <option value="Electrical Technology">Electrical Technology</option>
-            <option value="Computer Technology">Computer Technology</option>
-            <option value="Civil Technology">Civil Technology</option>
-            <option value="Mechanical Technology">Mechanical Technology</option>
+            <option value="All">All Classes</option>
+            <option value="Class 6">Class 6</option>
+            <option value="Class 7">Class 7</option>
+            <option value="Class 8">Class 8</option>
+            <option value="Class 9">Class 9</option>
+            <option value="Class 10">Class 10</option>
           </select>
         </div>
       </div>
@@ -239,7 +251,8 @@ export default function ManageStudentsPage() {
                 <tr>
                   <th>Student Info</th>
                   <th>Student ID</th>
-                  <th>Department</th>
+                  <th>Class</th>
+                  <th>Group</th>
                   <th>Joined Date</th>
                   <th className="text-right">Actions</th>
                 </tr>
@@ -260,17 +273,21 @@ export default function ManageStudentsPage() {
                         </div>
                       </div>
                     </td>
-                     <td>
-                    <span className="font-mono text-xs font-semibold">
-                  {student.studentId || <span className="badge badge-warning badge-sm">Pending</span>}
-                    </span>
-                     </td>
                     <td>
-                 <span className="badge badge-ghost badge-sm font-medium">
-                 {student.department || <span className="text-error font-semibold">Not Set</span>}
-                  </span>
-                   </td>
-                    
+                      <span className="font-mono text-xs font-semibold">
+                        {student.studentId || <span className="badge badge-warning badge-sm">Pending</span>}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge badge-ghost badge-sm font-medium">
+                        {student.class || <span className="text-error font-semibold">Not Set</span>}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge badge-outline badge-sm font-medium">
+                        {student.group || "General"}
+                      </span>
+                    </td>
                     <td className="text-xs text-base-content/60">
                       {student.createdAt ? new Date(student.createdAt).toLocaleDateString() : "N/A"}
                     </td>
@@ -328,7 +345,7 @@ export default function ManageStudentsPage() {
                     type="text"
                     name="name"
                     required
-                    placeholder="e.g. Md Tanzid Hasan"
+                    placeholder="e.g. Md Tanjid Hasan"
                     value={formData.name}
                     onChange={handleInputChange}
                     className="input input-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-primary"
@@ -370,37 +387,63 @@ export default function ManageStudentsPage() {
                 </div>
               )}
 
+              <div>
+                <label className="text-xs font-semibold text-base-content/70 mb-1 block">Student ID / Roll</label>
+                <div className="relative">
+                  <FiHash className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+                  <input
+                    type="text"
+                    name="studentId"
+                    required
+                    placeholder="e.g. ST-202601"
+                    value={formData.studentId}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+
+              {/* Class and Group Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Student ID</label>
+                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Class</label>
                   <div className="relative">
-                    <FiHash className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
-                    <input
-                      type="text"
-                      name="studentId"
-                      required
-                      placeholder="e.g. ST-1020"
-                      value={formData.studentId}
+                    <FiBookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+                    <select
+                      name="class"
+                      value={formData.class}
                       onChange={handleInputChange}
-                      className="input input-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-primary"
-                    />
+                      className="select select-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-primary"
+                    >
+                      <option value="Class 6">Class 6</option>
+                      <option value="Class 7">Class 7</option>
+                      <option value="Class 8">Class 8</option>
+                      <option value="Class 9">Class 9</option>
+                      <option value="Class 10">Class 10</option>
+                    </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Department</label>
+                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Group / Section</label>
                   <div className="relative">
-                    <FiBookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+                    <FiLayers className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
                     <select
-                      name="department"
-                      value={formData.department}
+                      name="group"
+                      value={formData.group}
                       onChange={handleInputChange}
-                      className="select select-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-primary"
+                      disabled={["Class 6", "Class 7", "Class 8"].includes(formData.class)}
+                      className="select select-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-primary disabled:bg-base-200"
                     >
-                      <option value="Electrical Technology">Electrical Tech</option>
-                      <option value="Computer Technology">Computer Tech</option>
-                      <option value="Civil Technology">Civil Tech</option>
-                      <option value="Mechanical Technology">Mechanical Tech</option>
+                      {["Class 6", "Class 7", "Class 8"].includes(formData.class) ? (
+                        <option value="General">General</option>
+                      ) : (
+                        <>
+                          <option value="Science">Science</option>
+                          <option value="Arts">Arts</option>
+                          <option value="Commerce">Commerce</option>
+                        </>
+                      )}
                     </select>
                   </div>
                 </div>
@@ -425,7 +468,7 @@ export default function ManageStudentsPage() {
                     "Save Changes"
                   ) : (
                     "Create Student"
-                  )}
+                  ) }
                 </button>
               </div>
             </form>
