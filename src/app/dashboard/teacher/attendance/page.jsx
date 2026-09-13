@@ -1,5 +1,7 @@
 "use client";
+import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
+ // অথবা আপনার Auth Hook (যেমন: useAuth)
 import { 
   FiCheckCircle, 
   FiXCircle, 
@@ -8,8 +10,11 @@ import {
 } from "react-icons/fi";
 
 export default function TeacherAttendancePage() {
+  const { data: session } = useSession(); // Logged-in user session
+  const teacherEmail = session?.user?.email;
+
   const [classId, setClassId] = useState("Class 8");
-  const [group, setGroup] = useState("General"); // Default group
+  const [group, setGroup] = useState("General");
   const [subject, setSubject] = useState("Electrical Circuits");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [students, setStudents] = useState([]);
@@ -18,7 +23,6 @@ export default function TeacherAttendancePage() {
   const [submitting, setSubmitting] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
-  // Fetch Students by Class and Group
   useEffect(() => {
     const fetchStudents = async () => {
       setLoading(true);
@@ -29,7 +33,6 @@ export default function TeacherAttendancePage() {
         if (data.success && data.students) {
           setStudents(data.students);
 
-          // Default mark all as Present
           const initialStatus = {};
           data.students.forEach((s) => {
             initialStatus[s._id] = "Present";
@@ -67,6 +70,11 @@ export default function TeacherAttendancePage() {
     e.preventDefault();
     if (students.length === 0) return;
 
+    if (!teacherEmail) {
+      alert("Teacher email not found. Please log in first.");
+      return;
+    }
+
     setSubmitting(true);
 
     const records = students.map((student) => ({
@@ -86,7 +94,7 @@ export default function TeacherAttendancePage() {
           group,
           subject, 
           records,
-          teacherName: ""
+          teacherEmail // <-- teacherName-এর বদলে teacherEmail পাঠাচ্ছি
         }),
       });
       const data = await res.json();
@@ -94,6 +102,8 @@ export default function TeacherAttendancePage() {
       if (data.success) {
         setToastMsg("Attendance submitted successfully!");
         setTimeout(() => setToastMsg(""), 3000);
+      } else {
+        alert(data.message || "Failed to submit attendance");
       }
     } catch (err) {
       console.error("Attendance submission error:", err);
@@ -122,7 +132,6 @@ export default function TeacherAttendancePage() {
         </p>
       </div>
 
-      {/* Control Panel */}
       <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label className="text-xs font-semibold text-base-content/70 mb-1 block">Date</label>
@@ -174,7 +183,6 @@ export default function TeacherAttendancePage() {
         </div>
       </div>
 
-      {/* Student List Section */}
       <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2 border-b border-base-200 pb-3">
           <span className="text-base font-bold text-base-content">

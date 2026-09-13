@@ -1,5 +1,7 @@
+
 "use client";
 import { useState, useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
 import { 
   FiFileText, 
   FiSave, 
@@ -23,6 +25,8 @@ export default function InputMarksPage() {
   const [hasExistingData, setHasExistingData] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { data: session } = useSession();
 
   // ডাটা ফেচ করা
   const fetchData = async () => {
@@ -75,22 +79,30 @@ export default function InputMarksPage() {
 
   const handleSubmitMarks = async (e) => {
     e.preventDefault();
+
+    const teacherEmail = session?.user?.email;
+    if (!teacherEmail) {
+      alert("Teacher email not found. Please wait for session to load or log in again.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const formattedMarks = students.map((std) => ({
       studentId: std._id,
       studentName: std.name,
-      roll: std.roll || "N/A",
-      obtainedMarks: marksData[std._id] !== undefined && marksData[std._id] !== "" 
-        ? Number(marksData[std._id]) 
-        : 0
+      roll: std.roll || std.rollNo || std.studentId || "N/A", // সঠিক Roll priority
+      obtainedMarks:
+        marksData[std._id] !== undefined && marksData[std._id] !== ""
+          ? Number(marksData[std._id])
+          : 0
     }));
 
     const payload = {
       classId: selectedClass,
       examType: selectedExam,
       subjectName: selectedSubject,
-      teacherEmail: "teacher@school.com",
+      teacherEmail,
       marks: formattedMarks
     };
 
@@ -274,7 +286,7 @@ export default function InputMarksPage() {
                   {students.map((student) => (
                     <tr key={student._id} className="hover:bg-base-200/30 transition-colors">
                       <td className="font-bold text-xs text-base-content/70">
-                        #{student.studentId || "N/A"}
+                        #{student.roll || student.rollNo || student.studentId || "N/A"}
                       </td>
                       <td>
                         <div className="flex items-center gap-3">
@@ -326,7 +338,7 @@ export default function InputMarksPage() {
                         <div className="font-bold text-sm text-base-content">{student.name}</div>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className="text-[11px] text-base-content/60 flex items-center gap-0.5">
-                            <FiHash size={10} /> Roll: <span className="font-semibold text-base-content">{student.roll || student.studentId || "N/A"}</span>
+                            <FiHash size={10} /> Roll: <span className="font-semibold text-base-content">{student.roll || student.rollNo || student.studentId || "N/A"}</span>
                           </span>
                           <span className="badge badge-xs bg-base-200 text-base-content/80 font-medium border-0">
                             {student.classId || student.class || selectedClass}
