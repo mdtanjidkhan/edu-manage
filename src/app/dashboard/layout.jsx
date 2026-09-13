@@ -52,6 +52,7 @@ export default function DashboardLayout({ children }) {
   // Teacher Menu
   const teacherMenuItems = [
     { name: "Dashboard", href: "/dashboard/teacher", icon: FiHome },
+    { name: "My Attendance", href: "/dashboard/teacher/my-attendance", icon: FiCalendar },
     { name: "Take Attendance", href: "/dashboard/teacher/attendance", icon: FiCheckSquare },
     { name: "Input Marks", href: "/dashboard/teacher/marks", icon: FiFileText },
     { name: "My Class Routine", href: "/dashboard/teacher/routine", icon: FiClock },
