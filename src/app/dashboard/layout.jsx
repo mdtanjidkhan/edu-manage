@@ -8,6 +8,7 @@ import {
   FiSettings, FiLogOut, FiBell, FiUser, FiBookOpen, 
   FiAward, FiCheckSquare, FiClock, FiFileText, FiShield,
 } from "react-icons/fi";
+import { MdAssignmentAdd } from "react-icons/md";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
@@ -57,6 +58,7 @@ export default function DashboardLayout({ children }) {
     { name: "Input Marks", href: "/dashboard/teacher/marks", icon: FiFileText },
     { name: "My Class Routine", href: "/dashboard/teacher/routine", icon: FiClock },
     { name: "My Students", href: "/dashboard/teacher/students", icon: FiUsers },
+    { name: "Assignments", href: "/dashboard/teacher/assignments", icon: MdAssignmentAdd },
   ];
 
   // Student Menu
