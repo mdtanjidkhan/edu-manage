@@ -66,6 +66,7 @@ export default function DashboardLayout({ children }) {
     { name: "My Dashboard", href: "/dashboard/student", icon: FiHome },
     { name: "Class Routine", href: "/dashboard/student/routine", icon: FiBookOpen },
     { name: "My Attendance", href: "/dashboard/student/attendance", icon: FiCalendar },
+    { name: "Assignments", href: "/dashboard/student/assignments", icon: MdAssignmentAdd },
     { name: "Exam Results", href: "/dashboard/student/results", icon: FiAward },
     { name: "Pay Fees", href: "/dashboard/student/fees", icon: FiDollarSign },
   ];
