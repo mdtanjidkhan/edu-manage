@@ -2,7 +2,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
-import { FiPlus, FiBookOpen, FiClock, FiTrash2, FiEdit2, FiUsers, FiX } from "react-icons/fi";
+import { 
+  FiPlus, FiBookOpen, FiClock, FiTrash2, FiEdit2, 
+  FiUsers, FiX, FiEye, FiExternalLink, FiFileText 
+} from "react-icons/fi";
 
 const classesList = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
 const groupOptions = ["Science", "Humanities", "Business Studies"];
@@ -12,8 +15,17 @@ export default function TeacherAssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [assignments, setAssignments] = useState([]);
+  
+  // Modals State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null); // Track Edit ID
+  const [editingId, setEditingId] = useState(null);
+
+  // Submissions Modal State
+  const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
+  const [selectedAssignmentTitle, setSelectedAssignmentTitle] = useState("");
+  const [submissionsList, setSubmissionsList] = useState([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [activeSubmissionDetails, setActiveSubmissionDetails] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -44,7 +56,26 @@ export default function TeacherAssignmentsPage() {
     fetchAssignments();
   }, [session?.user?.email]);
 
-  // Open Modal for New Assignment
+  // Open Submissions List Modal
+  const handleViewSubmissions = async (assignment) => {
+    setSelectedAssignmentTitle(assignment.title);
+    setIsSubmissionModalOpen(true);
+    setLoadingSubmissions(true);
+    setActiveSubmissionDetails(null);
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/teacher/assignments/${assignment.id}/submissions`
+      );
+      const result = await res.json();
+      if (result.success) setSubmissionsList(result.data);
+    } catch (err) {
+      console.error("Fetch Submissions Error:", err);
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
   const handleOpenCreateModal = () => {
     setEditingId(null);
     setFormData({
@@ -58,11 +89,8 @@ export default function TeacherAssignmentsPage() {
     setIsModalOpen(true);
   };
 
-  // Open Modal for Edit Assignment
   const handleOpenEditModal = (item) => {
     setEditingId(item.id);
-
-    // Format deadline to ISO string format for datetime-local input
     const formattedDeadline = item.deadline
       ? new Date(item.deadline).toISOString().slice(0, 16)
       : "";
@@ -89,7 +117,6 @@ export default function TeacherAssignmentsPage() {
     }));
   };
 
-  // Submit Handler for Create OR Edit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -148,7 +175,7 @@ export default function TeacherAssignmentsPage() {
             <FiBookOpen className="text-primary" /> Manage Assignments
           </h1>
           <p className="text-xs text-base-content/60 mt-1">
-            Create, update and manage assignments for your classes.
+            Create, update and inspect student submitted assignments.
           </p>
         </div>
         <button
@@ -184,8 +211,7 @@ export default function TeacherAssignmentsPage() {
                   <span className="text-xs font-bold px-2.5 py-1 bg-primary/10 text-primary rounded-xl">
                     {item.classId} {item.group !== "General" && `(${item.group})`}
                   </span>
-                  
-                  {/* Action Buttons: Edit & Delete */}
+
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleOpenEditModal(item)}
@@ -209,21 +235,141 @@ export default function TeacherAssignmentsPage() {
                 <p className="text-xs text-base-content/70 line-clamp-2">{item.description}</p>
               </div>
 
-              <div className="border-t border-base-200 pt-3 flex justify-between items-center text-xs text-base-content/60">
-                <span className="flex items-center gap-1">
+              <div className="border-t border-base-200 pt-3 flex justify-between items-center text-xs">
+                <span className="flex items-center gap-1 text-base-content/60">
                   <FiClock className="text-error" />
                   Due: {new Date(item.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </span>
-                <span className="flex items-center gap-1 font-semibold text-base-content">
-                  <FiUsers className="text-primary" /> {item.totalSubmissions} Submissions
-                </span>
+
+                <button
+                  onClick={() => handleViewSubmissions(item)}
+                  className="btn btn-outline btn-primary btn-xs rounded-xl font-semibold flex items-center gap-1"
+                >
+                  <FiUsers size={12} /> {item.totalSubmissions} Submissions
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal for Create/Edit Assignment */}
+      {/* Modal 1: Submissions View Modal */}
+      {isSubmissionModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-base-100 border border-base-200 w-full max-w-2xl rounded-3xl p-6 shadow-xl space-y-4 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center border-b border-base-200 pb-3">
+              <div>
+                <h2 className="font-bold text-lg text-base-content">Student Submissions</h2>
+                <p className="text-xs text-primary font-semibold">{selectedAssignmentTitle}</p>
+              </div>
+              <button
+                onClick={() => setIsSubmissionModalOpen(false)}
+                className="p-1 hover:bg-base-200 rounded-full transition-all"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
+
+            {loadingSubmissions ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-2">
+                <span className="loading loading-spinner text-primary loading-md"></span>
+                <p className="text-xs text-base-content/60">Loading Submissions...</p>
+              </div>
+            ) : submissionsList.length === 0 ? (
+              <div className="text-center py-8 text-base-content/60 space-y-1">
+                <FiFileText size={24} className="mx-auto text-base-content/40" />
+                <p className="text-sm font-medium">No students have submitted this assignment yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="overflow-x-auto">
+                  <table className="table table-xs w-full">
+                    <thead>
+                      <tr className="border-base-200 text-base-content/60">
+                        <th>Student Name</th>
+                        <th>Submitted At</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {submissionsList.map((sub) => (
+                        <tr key={sub._id} className="border-base-200 hover:bg-base-200/30">
+                          <td className="font-bold text-base-content">
+                            {sub.studentName}
+                            <span className="block text-[10px] font-normal text-base-content/60">{sub.studentEmail}</span>
+                            <span className="block text-[10px] font-normal text-base-content/60 mt-1">Roll No:{sub.studentId}</span>
+                          </td>
+                          <td className="text-base-content/70">
+                            {new Date(sub.submittedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </td>
+                          <td>
+                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
+                              sub.status === "Late" ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
+                            }`}>
+                              {sub.status || "Submitted"}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => setActiveSubmissionDetails(sub)}
+                              className="btn btn-ghost btn-xs text-primary gap-1"
+                            >
+                              <FiEye size={12} /> View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Detailed View Modal Box for Selected Student */}
+                {activeSubmissionDetails && (
+                  <div className="bg-base-200/50 border border-base-200 p-4 rounded-2xl space-y-3 mt-4">
+                    <div className="flex justify-between items-center border-b border-base-200 pb-2">
+                      <h4 className="font-bold text-xs text-base-content">
+                        Submission Details: <span className="text-primary">{activeSubmissionDetails.studentName}</span>
+                      </h4>
+                      <button
+                        onClick={() => setActiveSubmissionDetails(null)}
+                        className="text-xs text-error font-semibold hover:underline"
+                      >
+                        Close Details
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 text-xs">
+                      <div>
+                        <span className="font-semibold text-base-content/70">Submitted Text / Notes:</span>
+                        <p className="bg-base-100 p-3 rounded-xl border border-base-200 mt-1 whitespace-pre-wrap text-base-content">
+                          {activeSubmissionDetails.submissionText || "No text provided."}
+                        </p>
+                      </div>
+
+                      {activeSubmissionDetails.fileUrl && (
+                        <div>
+                          <span className="font-semibold text-base-content/70">Attached Link:</span>
+                          <a
+                            href={activeSubmissionDetails.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-primary hover:underline mt-1 font-semibold break-all"
+                          >
+                            <FiExternalLink /> {activeSubmissionDetails.fileUrl}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal 2: Create / Edit Assignment Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-base-100 border border-base-200 w-full max-w-lg rounded-3xl p-6 shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
