@@ -25,3 +25,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* Custom Swiper Styles for Hero Section */
+
+
+/* /* .custom-hero-swiper .swiper-button-next, */
+
+.custom-hero-swiper .swiper-button-prev {
+  color: white !important;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50%;
+}
+
+.custom-hero-swiper .swiper-button-next::after,
+.custom-hero-swiper .swiper-button-prev::after {
+  font-size: 16px !important;
+  font-weight: bold;
+}
+
+.custom-hero-swiper .swiper-pagination-bullet-active {
+  background-color: #3b82f6 !important; /* Your primary color */
+  width: 24px !important;
+  border-radius: 8px !important;
+}
