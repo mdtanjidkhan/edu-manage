@@ -20,7 +20,6 @@ export default function StudentPayPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // ক্লাস বা গ্রুপ চেঞ্জ হলে অটো ডাটা লোড হবে
   useEffect(() => {
     fetchStudentFees();
   }, [selectedClass, selectedGroup]);
