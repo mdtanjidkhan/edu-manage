@@ -95,7 +95,7 @@ export default function Navbar() {
                       className={`rounded-lg transition-all font-semibold ${
                         pathname.startsWith("/dashboard")
                           ? "bg-primary text-primary-content font-bold"
-                          : "text-primary hover:bg-primary/10"
+                          : " hover:bg-primary/10"
                       }`}
                     >
                       Dashboard
