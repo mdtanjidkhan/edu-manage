@@ -15,7 +15,6 @@ export default function Navbar() {
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
 
-  // ড্যাশবোর্ডে থাকলে Navbar হাইড থাকবে
   if (pathname.startsWith("/dashboard")) {
     return null;
   }
@@ -31,7 +30,6 @@ export default function Navbar() {
     });
   };
 
-  // মোবাইল ড্রয়ার বন্ধ করার ফাংশন
   const closeDrawer = () => {
     const drawerCheckbox = document.getElementById("navbar-drawer");
     if (drawerCheckbox) drawerCheckbox.checked = false;
