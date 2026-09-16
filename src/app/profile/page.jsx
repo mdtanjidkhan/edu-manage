@@ -15,9 +15,8 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY || "YOUR_IMGBB_API_KEY";
+  const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
-  // ইউজার রোল নির্ধারণ (Default: student)
   const userRole = user?.role || "student";
 
   const handleFileChange = (e) => {
