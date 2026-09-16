@@ -9,7 +9,7 @@ export default async function DashboardPage() {
   if (!session) {
     redirect("/login");
   }
-
+//   role of the user from the session
   const role = session.user?.role; 
   switch (role) {
     case "admin":
@@ -19,7 +19,6 @@ export default async function DashboardPage() {
     case "student":
       redirect("/dashboard/student");
     default:
-     
       redirect("/unauthorized");
   }
 }
