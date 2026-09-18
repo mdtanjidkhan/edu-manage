@@ -24,6 +24,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
+      console.log("Better Auth Error Details:", error);
       alert(error.message || "Invalid email or password!");
     } else {
       const session = await authClient.getSession();
