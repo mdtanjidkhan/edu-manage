@@ -1,7 +1,6 @@
 "use client";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
- // অথবা আপনার Auth Hook (যেমন: useAuth)
 import { 
   FiCheckCircle, 
   FiXCircle, 
@@ -85,16 +84,19 @@ export default function TeacherAttendancePage() {
     }));
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch("http://localhost:5000/api/teacher/attendance", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           authorization: `Bearer ${tokenData?.token}`
+         },
         body: JSON.stringify({ 
           date, 
           classId, 
           group,
           subject, 
           records,
-          teacherEmail // <-- teacherName-এর বদলে teacherEmail পাঠাচ্ছি
+          teacherEmail 
         }),
       });
       const data = await res.json();

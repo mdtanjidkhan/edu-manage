@@ -1,4 +1,5 @@
 "use client";
+import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import { 
   FiSettings, 
@@ -51,9 +52,12 @@ export default function AdminSettingsPage() {
     setSaving(true);
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch("http://localhost:5000/api/admin/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           authorization: `Bearer ${tokenData?.token}`
+         },
         body: JSON.stringify(settings)
       });
       const data = await res.json();

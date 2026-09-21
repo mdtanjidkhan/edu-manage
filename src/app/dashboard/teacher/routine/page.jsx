@@ -47,7 +47,6 @@ export default function TeacherRoutinePage() {
   };
 
   useEffect(() => {
-    // Session load হওয়া শেষ হলে তবেই fetch রান করবে
     if (!isSessionLoading && loggedInTeacherEmail) {
       fetchTeacherRoutines();
     }

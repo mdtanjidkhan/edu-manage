@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CreditCard, CheckCircle2, DollarSign, Filter, Send, AlertCircle } from 'lucide-react';
+import { authClient } from '@/lib/auth-client';
 
 export default function StudentPayPage() {
   // Filter States
@@ -61,9 +62,12 @@ export default function StudentPayPage() {
     };
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch('http://localhost:5000/api/student/pay', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+           authorization: `Bearer ${tokenData?.token}`
+         },
         body: JSON.stringify(paymentPayload)
       });
 

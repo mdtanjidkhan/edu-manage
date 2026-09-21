@@ -1,7 +1,7 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { 
   FiPlus, FiBookOpen, FiClock, FiTrash2, FiEdit2, 
   FiUsers, FiX, FiEye, FiExternalLink, FiFileText 
@@ -128,9 +128,12 @@ export default function TeacherAssignmentsPage() {
     const method = editingId ? "PUT" : "POST";
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           authorization: `Bearer ${tokenData?.token}`
+         },
         body: JSON.stringify({
           ...formData,
           teacherEmail: session?.user?.email,
@@ -151,11 +154,15 @@ export default function TeacherAssignmentsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this assignment?")) return;
+    // if (!confirm("Are you sure you want to delete this assignment?")) return;
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(`http://localhost:5000/api/teacher/assignments/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+         headers: { "Content-Type": "application/json",
+          authorization: `Bearer ${tokenData?.token}`
+          },
       });
       const result = await res.json();
       if (result.success) fetchAssignments();

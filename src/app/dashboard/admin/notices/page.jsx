@@ -1,4 +1,5 @@
 "use client";
+import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import { 
   FiBell, 
@@ -73,9 +74,12 @@ export default function AdminNoticesPage() {
     const method = isEdit ? "PATCH" : "POST";
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           authorization: `Bearer ${tokenData?.token}`
+         },
         body: JSON.stringify(formData)
       });
       const data = await res.json();
@@ -95,11 +99,15 @@ export default function AdminNoticesPage() {
 
   // Handle Delete Notice
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this notice?")) return;
+    // if (!confirm("Are you sure you want to delete this notice?")) return;
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(`http://localhost:5000/api/admin/notices/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+         headers: { "Content-Type": "application/json",
+          authorization: `Bearer ${tokenData?.token}`
+          },
       });
       const data = await res.json();
       if (data.success) {

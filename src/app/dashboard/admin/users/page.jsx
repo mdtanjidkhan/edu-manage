@@ -1,4 +1,5 @@
 "use client";
+import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import { 
   FiShield, 
@@ -51,12 +52,15 @@ export default function UserRoleManagementPage() {
     setIsSubmitting(true);
 
     try {
+      const { data: tokenData} = await authClient.token();
+      console.log("Token Data:", tokenData);
       const res = await fetch(`http://localhost:5000/api/admin/users/${selectedUser._id}/access`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", 
+          authorization: `Bearer ${tokenData?.token}`
+        },
         body: JSON.stringify({ role: newRole, status: newStatus })
       });
-
       const data = await res.json();
 
       if (data.success) {

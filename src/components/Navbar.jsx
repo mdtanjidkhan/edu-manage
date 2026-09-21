@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { 
-  FiBell, FiUser, FiLogOut, FiLayout, FiMenu, FiX 
+  FiBell, FiUser, FiLogOut, FiLayout, FiMenu, FiX, FiGlobe 
 } from "react-icons/fi";
 
 export default function Navbar() {
@@ -105,6 +105,16 @@ export default function Navbar() {
 
           {/* --- NAVBAR END: Login/Logout & Profile Avatar --- */}
           <div className="navbar-end gap-2">
+            
+            {/* Language Toggle Button (Notification-এর বাম পাশে রাখা হলো) */}
+            <button 
+              className="btn btn-ghost btn-sm gap-1 font-semibold text-xs sm:text-sm border border-base-300"
+              aria-label="Toggle Language"
+            >
+              <FiGlobe className="w-4 h-4 text-primary" />
+              <span>BN</span> {/* পরবর্তীতে state অনুযায়ী 'EN' / 'BN' ডায়নামিক হবে */}
+            </button>
+
             {isPending ? (
               <span className="loading loading-spinner loading-sm text-primary"></span>
             ) : user ? (
@@ -112,7 +122,7 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 
                 {/* Notifications Button */}
-                <button className="btn btn-ghost btn-circle hidden sm:flex">
+                <button className="btn btn-ghost btn-circle sm:flex">
                   <div className="indicator">
                     <FiBell size={20} />
                     <span className="badge badge-xs badge-primary indicator-item"></span>
@@ -309,6 +319,7 @@ export default function Navbar() {
     </>
   );
 }
+
 
 
 

@@ -1,4 +1,5 @@
 "use client";
+import { authClient } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import { 
   FiClock, 
@@ -112,9 +113,11 @@ export default function AdminRoutinePage() {
     const method = editId ? "PUT" : "POST";
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           authorization: `Bearer ${tokenData?.token}` },
         body: JSON.stringify(formData)
       });
       const data = await res.json();
@@ -137,8 +140,10 @@ export default function AdminRoutinePage() {
     setIsSubmitting(true);
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(`http://localhost:5000/api/admin/routine/${deleteCandidate._id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: { authorization: `Bearer ${tokenData?.token}` }
       });
       const data = await res.json();
 

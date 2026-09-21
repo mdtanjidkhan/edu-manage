@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { FiBookOpen, FiClock, FiCheckCircle, FiAlertCircle, FiSend, FiX, FiLink, FiFileText } from "react-icons/fi";
 
 export default function StudentAssignmentsPage() {
@@ -45,9 +45,11 @@ export default function StudentAssignmentsPage() {
     setSubmitting(true);
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch("http://localhost:5000/api/student/assignments/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           authorization: `Bearer ${tokenData?.token}` },
         body: JSON.stringify({
           assignmentId: selectedAssignment.id,
           studentEmail: session?.user?.email,

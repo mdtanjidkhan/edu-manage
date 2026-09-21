@@ -1,7 +1,7 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { 
   FiFileText, 
   FiSave, 
@@ -107,9 +107,12 @@ export default function InputMarksPage() {
     };
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch("http://localhost:5000/api/teacher/marks", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           authorization: `Bearer ${tokenData?.token}`
+         },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -128,13 +131,19 @@ export default function InputMarksPage() {
   };
 
   const handleDeleteMarks = async () => {
-    if (!confirm(`Are you sure you want to delete marks for ${selectedClass} - ${selectedSubject} (${selectedExam})?`)) return;
+    // if (!confirm(`Are you sure you want to delete marks for ${selectedClass} - ${selectedSubject} (${selectedExam})?`)) return;
 
     setIsSubmitting(true);
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(
         `http://localhost:5000/api/teacher/marks?classId=${selectedClass}&examType=${selectedExam}&subjectName=${selectedSubject}`,
-        { method: "DELETE" }
+        { 
+          method: "DELETE",
+          headers: { "Content-Type": "application/json",
+             authorization: `Bearer ${tokenData?.token}`
+           }
+        }
       );
       const data = await res.json();
 

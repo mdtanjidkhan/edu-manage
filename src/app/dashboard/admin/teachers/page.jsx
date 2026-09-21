@@ -1,4 +1,5 @@
 "use client";
+import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import { 
   FiUserCheck, 
@@ -102,9 +103,10 @@ export default function ManageTeachersPage() {
     const method = isEditMode ? "PUT" : "POST";
 
     try {
+      const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", authorization: `Bearer ${tokenData.token}` },
         body: JSON.stringify(formData)
       });
 
@@ -132,8 +134,10 @@ export default function ManageTeachersPage() {
     setIsSubmitting(true);
 
     try {
+      const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(`http://localhost:5000/api/admin/teachers/${deleteCandidate._id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: { authorization: `Bearer ${tokenData.token}` }
       });
 
       const data = await res.json();

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client"; // আপনার অথেন্টিকেশন হুক
+import { authClient, useSession } from "@/lib/auth-client"; 
 import { FiClock, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
 export default function TeacherCheckInPage() {
@@ -11,7 +11,6 @@ export default function TeacherCheckInPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
 
-  // আজকের অ্যাটেনডেন্স স্ট্যাটাস চেক করা
   useEffect(() => {
     const checkStatus = async () => {
       if (!session?.user?.email) return;
@@ -33,8 +32,6 @@ export default function TeacherCheckInPage() {
 
     checkStatus();
   }, [session?.user?.email]);
-
-  // চেক-ইন বাটন সাবমিট হ্যান্ডলার
   const handleCheckIn = async () => {
     if (!session?.user?.email) return;
 
@@ -42,10 +39,12 @@ export default function TeacherCheckInPage() {
     setMessage({ text: "", type: "" });
 
     try {
+       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch("http://localhost:5000/api/teacher/check-in", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${tokenData?.token}`
         },
         body: JSON.stringify({
           teacherEmail: session.user.email,
@@ -81,7 +80,6 @@ export default function TeacherCheckInPage() {
 
   return (
     <div className="bg-base-100 border border-base-200 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      {/* বাম পাশের ইনফরমেশন */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <FiClock className="text-primary" size={18} />
@@ -97,8 +95,6 @@ export default function TeacherCheckInPage() {
           </p>
         )}
       </div>
-
-      {/* ডান পাশের চেক-ইন বাটন বা স্ট্যাটাস */}
       <div>
         {hasCheckedIn ? (
           <div className="flex items-center gap-2 bg-success/10 text-success px-4 py-2.5 rounded-xl border border-success/20">
