@@ -19,7 +19,7 @@ export default function StudentAssignmentsPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/student/assignments?email=${session.user.email}`
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/assignments?email=${session.user.email}`
       );
       const result = await res.json();
       if (result.success) setAssignments(result.data);
@@ -46,7 +46,7 @@ export default function StudentAssignmentsPage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch("http://localhost:5000/api/student/assignments/submit", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/assignments/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
            authorization: `Bearer ${tokenData?.token}` },

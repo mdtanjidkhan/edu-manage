@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { authClient } from "@/lib/auth-client"; // আপনার Better Auth Client Path
+import { authClient } from "@/lib/auth-client"; // Better Auth Client Path
 import { 
   FiClock, 
   FiBookOpen, 
@@ -30,7 +30,7 @@ export default function TeacherRoutinePage() {
       console.log("Fetching routines for email:", cleanEmail);
 
       const res = await fetch(
-        `http://localhost:5000/api/teacher/routine/${encodeURIComponent(cleanEmail)}?day=${selectedDay}`
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/routine/${encodeURIComponent(cleanEmail)}?day=${selectedDay}`
       );
       const data = await res.json();
       

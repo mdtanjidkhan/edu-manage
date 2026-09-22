@@ -14,7 +14,7 @@ export default function StudentAttendancePage() {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/api/student/attendance?email=${session.user.email}`
+          `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/attendance?email=${session.user.email}`
         );
         const result = await res.json();
         if (result.success) setAttendanceData(result.data);

@@ -28,7 +28,7 @@ export default function TeacherDashboardPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/teacher/dashboard-stats?email=${teacherEmail}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/dashboard-stats?email=${teacherEmail}`);
         const data = await res.json();
         console.log("Dashboard stats fetched:", data);
         if (data.success) {
@@ -44,7 +44,6 @@ export default function TeacherDashboardPage() {
     fetchStats();
   }, [teacherEmail]);
 
-  // আজকের তারিখ ফরম্যাট করা
   const todayFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',

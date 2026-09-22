@@ -32,11 +32,11 @@ export default function InputMarksPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const studentRes = await fetch(`http://localhost:5000/api/admin/students?classId=${selectedClass}`);
+      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students?classId=${selectedClass}`);
       const studentData = await studentRes.json();
 
       const marksRes = await fetch(
-        `http://localhost:5000/api/teacher/marks?classId=${selectedClass}&examType=${selectedExam}&subjectName=${selectedSubject}`
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/marks?classId=${selectedClass}&examType=${selectedExam}&subjectName=${selectedSubject}`
       );
       const existingMarksData = await marksRes.json();
 
@@ -108,7 +108,7 @@ export default function InputMarksPage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch("http://localhost:5000/api/teacher/marks", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/marks`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
            authorization: `Bearer ${tokenData?.token}`
@@ -131,13 +131,11 @@ export default function InputMarksPage() {
   };
 
   const handleDeleteMarks = async () => {
-    // if (!confirm(`Are you sure you want to delete marks for ${selectedClass} - ${selectedSubject} (${selectedExam})?`)) return;
-
     setIsSubmitting(true);
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(
-        `http://localhost:5000/api/teacher/marks?classId=${selectedClass}&examType=${selectedExam}&subjectName=${selectedSubject}`,
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/marks?classId=${selectedClass}&examType=${selectedExam}&subjectName=${selectedSubject}`,
         { 
           method: "DELETE",
           headers: { "Content-Type": "application/json",

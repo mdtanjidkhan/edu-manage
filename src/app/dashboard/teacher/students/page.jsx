@@ -40,7 +40,7 @@ export default function MyStudentsPage() {
       
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/teacher/my-students?teacherEmail=${session.user.email}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/my-students?teacherEmail=${session.user.email}`);
         const data = await res.json();
 
         if (data.success) {

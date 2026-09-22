@@ -43,7 +43,7 @@ export default function AdminRoutinePage() {
   const fetchRoutines = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/routine?day=${selectedDay}&classId=${selectedClass}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/routine?day=${selectedDay}&classId=${selectedClass}`);
       const data = await res.json();
       if (data.success) setRoutines(data.routines);
     } catch (err) {
@@ -55,7 +55,7 @@ export default function AdminRoutinePage() {
 
   const fetchTeachers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/teachers");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers`);
       const data = await res.json();
       if (data.success) setTeachers(data.teachers);
     } catch (err) {
@@ -107,8 +107,8 @@ export default function AdminRoutinePage() {
     setIsSubmitting(true);
 
     const url = editId 
-      ? `http://localhost:5000/api/admin/routine/${editId}` 
-      : "http://localhost:5000/api/admin/routine";
+      ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/routine/${editId}` 
+      : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/routine`;
       
     const method = editId ? "PUT" : "POST";
 
@@ -141,7 +141,7 @@ export default function AdminRoutinePage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch(`http://localhost:5000/api/admin/routine/${deleteCandidate._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/routine/${deleteCandidate._id}`, {
         method: "DELETE",
         headers: { authorization: `Bearer ${tokenData?.token}` }
       });

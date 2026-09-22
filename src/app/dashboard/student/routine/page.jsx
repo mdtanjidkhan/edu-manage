@@ -10,7 +10,6 @@ export default function StudentRoutinePage() {
   const [loading, setLoading] = useState(true);
   const [routineData, setRoutineData] = useState(null);
   
-  // আজকের বার খেলাধুলার মতো সিলেক্টেড থাকবে
   const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
   const [selectedDay, setSelectedDay] = useState(days.includes(todayName) ? todayName : "Sunday");
 

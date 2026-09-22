@@ -17,8 +17,7 @@ export default function NoticeBoard() {
   useEffect(() => {
     async function fetchNotices() {
       try {
-        // ব্যাকএন্ড API থেকে ৪টি নোটিশ লিমিট করে ফেচ করা হচ্ছে
-        const res = await fetch("http://localhost:5000/api/notice?limit=4"); 
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/notice?limit=4`); 
         if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
         console.log("fech to no ", data)
@@ -27,12 +26,12 @@ export default function NoticeBoard() {
         console.error("Notice fetch error:", error);
         setNotices([
           {
-            _id: "6a9c5a39db5bae0d0a4962d0",
-            title: "President of dates",
-            description: "amar sorkar mara gese ai jonno chuti prodan kora holo all",
-            targetAudience: "All",
-            category: "Holiday",
-            date: "2026-09-05"
+            _id: "",
+            title: "",
+            description: "",
+            targetAudience: "",
+            category: "",
+            date: ""
           }
         ]);
       } finally {

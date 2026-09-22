@@ -29,7 +29,7 @@ export default function AdminNoticesPage() {
   // Fetch Notices
   const fetchNotices = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/notices");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/notices`);
       const data = await res.json();
       if (data.success) {
         setNotices(data.notices || []);
@@ -69,8 +69,8 @@ export default function AdminNoticesPage() {
 
     const isEdit = !!editingId;
     const url = isEdit 
-      ? `http://localhost:5000/api/admin/notices/${editingId}`
-      : "http://localhost:5000/api/admin/notices";
+      ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/notices/${editingId}`
+      : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/notices`;
     const method = isEdit ? "PATCH" : "POST";
 
     try {
@@ -103,7 +103,7 @@ export default function AdminNoticesPage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch(`http://localhost:5000/api/admin/notices/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/notices/${id}`, {
         method: "DELETE",
          headers: { "Content-Type": "application/json",
           authorization: `Bearer ${tokenData?.token}`

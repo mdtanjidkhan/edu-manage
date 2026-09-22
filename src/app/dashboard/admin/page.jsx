@@ -17,11 +17,11 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Express API থেকে Data Fetch করা
+  // Express API 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/admin/stats");
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/stats`);
         const data = await response.json();
 
         if (data.success) {

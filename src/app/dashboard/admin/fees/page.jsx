@@ -33,8 +33,8 @@ export default function AdminFeesPage() {
     setLoading(true);
     try {
       const [feesRes, paymentsRes] = await Promise.all([
-        fetch('http://localhost:5000/api/admin/fees'),
-        fetch('http://localhost:5000/api/admin/payments')
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees`),
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/payments`)
       ]);
 
       const feesData = await feesRes.json();
@@ -56,8 +56,8 @@ export default function AdminFeesPage() {
     e.preventDefault();
     const method = editId ? 'PUT' : 'POST';
     const url = editId
-      ? `http://localhost:5000/api/admin/fees/${editId}`
-      : 'http://localhost:5000/api/admin/fees';
+      ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees/${editId}`
+      : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees`;
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
@@ -86,9 +86,9 @@ export default function AdminFeesPage() {
     if (confirm('Are you sure you want to delete this fee structure?')) {
       try {
          const { data: tokenData,error: tokenError } = await authClient.token();
-        const res = await fetch(`http://localhost:5000/api/admin/fees/${id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees/${id}`, {
           method: 'DELETE',
-          // headers: { authorization: `Bearer ${tokenData?.token}` }
+
            headers: { "Content-Type": "application/json",
           authorization: `Bearer ${tokenData?.token}`
           },

@@ -11,8 +11,7 @@ export default function AllNoticesPage() {
   useEffect(() => {
     async function fetchAllNotices() {
       try {
-        // কোনো limit না পাঠিয়ে সব নোটিশ ফেচ করা হচ্ছে
-        const res = await fetch("http://localhost:5000/api/notice"); 
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/notice`); 
         const data = await res.json();
         setNotices(data);
       } catch (error) {

@@ -40,7 +40,7 @@ export default function ManageTeachersPage() {
 
   const fetchTeachers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/teachers");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers`);
       const data = await res.json();
       if (data.success) {
         setTeachers(data.teachers);
@@ -97,8 +97,8 @@ export default function ManageTeachersPage() {
     setFormSuccess("");
 
     const url = isEditMode 
-      ? `http://localhost:5000/api/admin/teachers/${editingTeacherId}`
-      : "http://localhost:5000/api/admin/teachers";
+      ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers/${editingTeacherId}`
+      : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers`;
 
     const method = isEditMode ? "PUT" : "POST";
 
@@ -106,7 +106,7 @@ export default function ManageTeachersPage() {
       const { data: tokenData,error: tokenError } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json", authorization: `Bearer ${tokenData.token}` },
+        headers: { "Content-Type": "application/json", authorization: `Bearer ${tokenData?.token}` },
         body: JSON.stringify(formData)
       });
 
@@ -135,9 +135,9 @@ export default function ManageTeachersPage() {
 
     try {
       const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch(`http://localhost:5000/api/admin/teachers/${deleteCandidate._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers/${deleteCandidate._id}`, {
         method: "DELETE",
-        headers: { authorization: `Bearer ${tokenData.token}` }
+        headers: { authorization: `Bearer ${tokenData?.token}` }
       });
 
       const data = await res.json();

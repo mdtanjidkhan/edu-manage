@@ -29,8 +29,8 @@ export default function AdminAttendancePage() {
     setLoading(true);
     try {
       const endpoint = activeTab === "students" 
-        ? `http://localhost:5000/api/admin/attendance/students?date=${selectedDate}&subject=${selectedSubject}`
-        : `http://localhost:5000/api/admin/attendance/teachers?date=${selectedDate}`;
+        ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/attendance/students?date=${selectedDate}&subject=${selectedSubject}`
+        : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/attendance/teachers?date=${selectedDate}`;
 
       const res = await fetch(endpoint);
       const data = await res.json();

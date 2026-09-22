@@ -31,7 +31,7 @@ export default function StudentPayPage() {
       const isGroupApplicable = selectedClass === 'Class 9' || selectedClass === 'Class 10';
       const groupQuery = isGroupApplicable ? `&group=${selectedGroup}` : '';
 
-      const res = await fetch(`http://localhost:5000/api/student/fees?className=${selectedClass}${groupQuery}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/fees?className=${selectedClass}${groupQuery}`);
       const data = await res.json();
 
       if (data.success) {
@@ -63,7 +63,7 @@ export default function StudentPayPage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch('http://localhost:5000/api/student/pay', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/pay`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
            authorization: `Bearer ${tokenData?.token}`

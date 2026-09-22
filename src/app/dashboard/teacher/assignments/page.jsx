@@ -41,7 +41,7 @@ export default function TeacherAssignmentsPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/teacher/assignments?teacherEmail=${session.user.email}`
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/assignments?teacherEmail=${session.user.email}`
       );
       const result = await res.json();
       if (result.success) setAssignments(result.data);
@@ -65,7 +65,7 @@ export default function TeacherAssignmentsPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/teacher/assignments/${assignment.id}/submissions`
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/assignments/${assignment.id}/submissions`
       );
       const result = await res.json();
       if (result.success) setSubmissionsList(result.data);
@@ -122,8 +122,8 @@ export default function TeacherAssignmentsPage() {
     setSubmitting(true);
 
     const url = editingId
-      ? `http://localhost:5000/api/teacher/assignments/${editingId}`
-      : "http://localhost:5000/api/teacher/assignments";
+      ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/assignments/${editingId}`
+      : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/assignments`;
 
     const method = editingId ? "PUT" : "POST";
 
@@ -158,7 +158,7 @@ export default function TeacherAssignmentsPage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch(`http://localhost:5000/api/teacher/assignments/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/assignments/${id}`, {
         method: "DELETE",
          headers: { "Content-Type": "application/json",
           authorization: `Bearer ${tokenData?.token}`

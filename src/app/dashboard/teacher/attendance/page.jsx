@@ -26,7 +26,7 @@ export default function TeacherAttendancePage() {
     const fetchStudents = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/teacher/students?classId=${encodeURIComponent(classId)}&group=${encodeURIComponent(group)}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/students?classId=${encodeURIComponent(classId)}&group=${encodeURIComponent(group)}`);
         const data = await res.json();
 
         if (data.success && data.students) {
@@ -85,7 +85,7 @@ export default function TeacherAttendancePage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch("http://localhost:5000/api/teacher/attendance", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/attendance`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
            authorization: `Bearer ${tokenData?.token}`

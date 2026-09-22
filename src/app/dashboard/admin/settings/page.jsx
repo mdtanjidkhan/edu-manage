@@ -34,7 +34,7 @@ export default function AdminSettingsPage() {
 
   // Fetch Current Settings and Analytics
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/settings")
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/settings`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -53,7 +53,7 @@ export default function AdminSettingsPage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch("http://localhost:5000/api/admin/settings", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json",
            authorization: `Bearer ${tokenData?.token}`

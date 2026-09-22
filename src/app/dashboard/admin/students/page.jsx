@@ -42,10 +42,9 @@ export default function ManageStudentsPage() {
     group: "General"
   });
 
-  // ১. Express API থেকে স্টুডেন্ট লিস্ট লোড করা
   const fetchStudents = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/students");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students`);
       const data = await res.json();
       // console.log(data)
       if (data.success) {
@@ -65,7 +64,6 @@ export default function ManageStudentsPage() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Class 6-8 এর জন্য group স্বয়ংক্রিয়ভাবে General হবে
     if (name === "class" && ["Class 6", "Class 7", "Class 8"].includes(value)) {
       setFormData({ ...formData, class: value, group: "General" });
     } else {
@@ -73,7 +71,7 @@ export default function ManageStudentsPage() {
     }
   };
 
-  // Add modal ওপেন করার জন্য
+  // Add modal 
   const handleOpenAddModal = () => {
     setIsEditMode(false);
     setEditingStudentId(null);
@@ -115,9 +113,8 @@ export default function ManageStudentsPage() {
     setFormSuccess("");
 
     const url = isEditMode 
-      ? `http://localhost:5000/api/admin/students/${editingStudentId}`
-      : "http://localhost:5000/api/admin/students";
-
+      ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students/${editingStudentId}`
+      : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students`;
     const method = isEditMode ? "PUT" : "POST";
        
     try {
@@ -156,9 +153,8 @@ export default function ManageStudentsPage() {
 
     try {
       const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch(`http://localhost:5000/api/admin/students/${deleteCandidate._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students/${deleteCandidate._id}`, {
         method: "DELETE",
-        // headers: { authorization: `Bearer ${tokenData?.token}` }
          headers: { "Content-Type": "application/json",
           authorization: `Bearer ${tokenData?.token}`
           },

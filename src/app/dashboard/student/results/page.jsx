@@ -15,7 +15,7 @@ export default function StudentResultsPage() {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/api/student/results?email=${session.user.email}`
+          `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/results?email=${session.user.email}`
         );
         const result = await res.json();
         if (result.success) {

@@ -24,7 +24,7 @@ export default function UserRoleManagementPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/users");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/users`);
       const data = await res.json();
       if (data.success) {
         setUsers(data.users);
@@ -54,7 +54,7 @@ export default function UserRoleManagementPage() {
     try {
       const { data: tokenData} = await authClient.token();
       console.log("Token Data:", tokenData);
-      const res = await fetch(`http://localhost:5000/api/admin/users/${selectedUser._id}/access`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/users/${selectedUser._id}/access`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", 
           authorization: `Bearer ${tokenData?.token}`

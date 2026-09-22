@@ -16,7 +16,7 @@ export default function TeacherCheckInPage() {
       if (!session?.user?.email) return;
 
       try {
-        const res = await fetch(`http://localhost:5000/api/teacher/attendance-status?teacherEmail=${session.user.email}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/attendance-status?teacherEmail=${session.user.email}`);
         const data = await res.json();
 
         if (data.success) {
@@ -40,7 +40,7 @@ export default function TeacherCheckInPage() {
 
     try {
        const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch("http://localhost:5000/api/teacher/check-in", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/check-in`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
