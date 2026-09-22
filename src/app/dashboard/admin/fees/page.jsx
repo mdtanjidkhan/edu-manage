@@ -1,447 +1,553 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Trash2, Edit, Plus, CreditCard, DollarSign, Calendar, Tag, LayerGroup, ArrowRightLeft } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  DollarSign, CheckCircle, Clock, AlertCircle, 
+  Plus, Edit, Trash2, Search, RefreshCw, Layers 
+} from 'lucide-react';
+import { 
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend 
+} from 'recharts';
+import toast from 'react-hot-toast';
 import { authClient } from '@/lib/auth-client';
 
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
-
-export default function AdminFeesPage() {
+export default function FeeManagement() {
+  // States
   const [fees, setFees] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterClass, setFilterClass] = useState('All');
+  const [filterStatus, setFilterStatus] = useState('All');
 
-  // Form State
-  const [form, setForm] = useState({
-    title: '',
-    category: 'Midterm Exam',
-    className: 'Class 8',
-    group: 'All',
-    amount: '',
-    dueDate: '',
-  });
+  // Edit Mode States
   const [editId, setEditId] = useState(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    category: 'Tuition Fee',
+    amount: '',
+    className: 'Class 6',
+    group: 'All',
+    dueDate: '',
+  });
 
+  const isGroupApplicable = formData.className === 'Class 9' || formData.className === 'Class 10';
+
+  // Fetch Data from Server
   const fetchData = async () => {
     setLoading(true);
     try {
+      const { data: tokenData } = await authClient.token();
+      const headers = {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${tokenData?.token}`,
+      };
+
       const [feesRes, paymentsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees`),
-        fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/payments`)
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/payments`, { headers }),
       ]);
 
-      const feesData = await feesRes.json();
-      const paymentsData = await paymentsRes.json();
-
-      if (feesData.success) setFees(feesData.data);
-      if (paymentsData.success) {
-        setPayments(paymentsData.payments);
-        setPieData(paymentsData.pieChartData);
+      if (feesRes.ok) {
+        const feesData = await feesRes.json();
+        setFees(Array.isArray(feesData) ? feesData : feesData.fees || feesData.data || []);
+      }
+      if (paymentsRes.ok) {
+        const paymentsData = await paymentsRes.json();
+        setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.payments || paymentsData.data || []);
       }
     } catch (error) {
-      console.error("Data Fetching Error:", error);
+      console.error('Error fetching data:', error);
+      toast.error('Failed to load fee management data');
+      setFees([]);
+      setPayments([]);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Form Submit (Create / Edit Fee)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const method = editId ? 'PUT' : 'POST';
-    const url = editId
-      ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees/${editId}`
-      : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees`;
-
     try {
-       const { data: tokenData,error: tokenError } = await authClient.token();
+      const { data: tokenData } = await authClient.token();
+      const url = editId 
+        ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees/${editId}`
+        : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees`;
+      
+      const method = editId ? 'PUT' : 'POST';
+
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json",
-          authorization: `Bearer ${tokenData?.token}`
-          },
-        body: JSON.stringify(form),
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${tokenData?.token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          group: isGroupApplicable ? formData.group : 'All',
+        }),
       });
 
-      const result = await res.json();
-      if (result.success) {
-        setForm({ title: '', category: 'Midterm Exam', className: 'Class 8', group: 'All', amount: '', dueDate: '' });
+      if (res.ok) {
+        toast.success(editId ? 'Fee updated successfully!' : 'Fee structure created!');
+        setFormData({ title: '', category: 'Tuition Fee', amount: '', className: 'Class 6', group: 'All', dueDate: '' });
         setEditId(null);
         fetchData();
       } else {
-        alert(result.message || 'An error occurred');
+        toast.error('Failed to save fee structure');
       }
     } catch (error) {
-      console.error("Submit Error:", error);
+      console.error(error);
+      toast.error('Something went wrong!');
     }
   };
 
-  const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this fee structure?')) {
-      try {
-         const { data: tokenData,error: tokenError } = await authClient.token();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees/${id}`, {
-          method: 'DELETE',
-
-           headers: { "Content-Type": "application/json",
-          authorization: `Bearer ${tokenData?.token}`
-          },
-        });
-        const result = await res.json();
-        if (result.success) {
-          fetchData();
-        }
-      } catch (error) {
-        console.error("Delete Error:", error);
-      }
-    }
-  };
-
+  // Edit Click Handler
   const handleEditClick = (fee) => {
     setEditId(fee._id);
-    setForm({
+    setFormData({
       title: fee.title,
-      category: fee.category,
+      category: fee.category || 'Tuition Fee',
+      amount: fee.amount,
       className: fee.className,
       group: fee.group || 'All',
-      amount: fee.amount,
-      dueDate: fee.dueDate,
+      dueDate: fee.dueDate ? fee.dueDate.split('T')[0] : '',
     });
   };
 
-  const isGroupApplicable = form.className === 'Class 9' || form.className === 'Class 10';
+  // Delete Fee Handler
+  const handleDeleteFee = async (id) => {
+    if (!confirm('Are you sure you want to delete this fee structure?')) return;
+    try {
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees/${id}`, {
+        method: 'DELETE',
+        headers: { authorization: `Bearer ${tokenData?.token}` },
+      });
+
+      if (res.ok) {
+        toast.success('Fee structure deleted!');
+        fetchData();
+      } else {
+        toast.error('Failed to delete fee');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Error deleting fee');
+    }
+  };
+
+  // Mark Payment Status as Paid
+  const handleMarkAsPaid = async (paymentId) => {
+    try {
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/payments/${paymentId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${tokenData?.token}`,
+        },
+        body: JSON.stringify({ status: 'Paid' }),
+      });
+
+      if (res.ok) {
+        toast.success('Payment status updated to Paid!');
+        fetchData();
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Something went wrong!');
+    }
+  };
+
+  // Toggle Status Cycle
+  const handleStatusToggle = async (payment) => {
+    let newStatus = 'Paid';
+    if (payment.status === 'Paid') newStatus = 'Unpaid';
+    else if (payment.status === 'Unpaid') newStatus = 'Pending';
+    else if (payment.status === 'Pending') newStatus = 'Paid';
+
+    try {
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/payments/${payment._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${tokenData?.token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        toast.success(`Status updated to ${newStatus}`);
+        fetchData();
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Something went wrong!');
+    }
+  };
+
+  // Filtered Payments Calculation (Safeguarded)
+  const filteredPayments = useMemo(() => {
+    if (!Array.isArray(payments)) return [];
+
+    return payments.filter((payment) => {
+      const matchesSearch = 
+        payment.studentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        payment.feeTitle?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesClass = filterClass === 'All' || payment.className === filterClass;
+      const matchesStatus = filterStatus === 'All' || payment.status === filterStatus;
+
+      return matchesSearch && matchesClass && matchesStatus;
+    });
+  }, [payments, searchQuery, filterClass, filterStatus]);
+
+  // Analytics Calculation (Safeguarded)
+  const stats = useMemo(() => {
+    if (!Array.isArray(payments)) return { totalCollected: 0, totalPending: 0, totalUnpaid: 0 };
+
+    const totalCollected = payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + Number(p.amount || 0), 0);
+    const totalPending = payments.filter(p => p.status === 'Pending').reduce((acc, p) => acc + Number(p.amount || 0), 0);
+    const totalUnpaid = payments.filter(p => p.status === 'Unpaid').reduce((acc, p) => acc + Number(p.amount || 0), 0);
+
+    return { totalCollected, totalPending, totalUnpaid };
+  }, [payments]);
+
+  // Pie Chart Data
+  const chartData = [
+    { name: 'Paid', value: stats.totalCollected, color: '#10b981' },
+    { name: 'Pending', value: stats.totalPending, color: '#f59e0b' },
+    { name: 'Unpaid', value: stats.totalUnpaid, color: '#ef4444' },
+  ];
 
   return (
-    <div className="p-8 bg-[#0f172a] text-slate-100 min-h-screen space-y-8 font-sans">
-      
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+    <div className="p-6 bg-slate-900 text-slate-100 min-h-screen space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <span className="p-2 bg-indigo-600/20 text-indigo-400 rounded-lg border border-indigo-500/30">
-              <DollarSign className="w-6 h-6" />
-            </span>
-            Fees & Billing Management
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <DollarSign className="w-7 h-7 text-indigo-400" /> Fee Management Dashboard
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Configure student tuition structures, exam fees, and track bKash payments.</p>
+          <p className="text-slate-400 text-sm">Manage class fees, payment statuses, and analytics</p>
+        </div>
+        <button
+          onClick={fetchData}
+          className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm border border-slate-700 transition"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Data
+        </button>
+      </div>
+
+      {/* Analytics Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-slate-800/80 border border-slate-700/60 p-5 rounded-xl flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg">
+            <CheckCircle className="w-8 h-8" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-400">Total Collected (Paid)</p>
+            <p className="text-2xl font-bold text-emerald-400">৳ {stats.totalCollected.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="bg-slate-800/80 border border-slate-700/60 p-5 rounded-xl flex items-center gap-4">
+          <div className="p-3 bg-amber-500/10 text-amber-400 rounded-lg">
+            <Clock className="w-8 h-8" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-400">Total Pending</p>
+            <p className="text-2xl font-bold text-amber-400">৳ {stats.totalPending.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="bg-slate-800/80 border border-slate-700/60 p-5 rounded-xl flex items-center gap-4">
+          <div className="p-3 bg-rose-500/10 text-rose-400 rounded-lg">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-400">Total Unpaid</p>
+            <p className="text-2xl font-bold text-rose-400">৳ {stats.totalUnpaid.toLocaleString()}</p>
+          </div>
         </div>
       </div>
 
-      {/* --- Grid Layout: Chart & Form --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Pie Chart Card */}
-        <div className="lg:col-span-6 bg-[#1e293b] p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-white tracking-wide flex items-center gap-2">
-              Revenue Distribution by Class
-            </h2>
-            <p className="text-slate-400 text-xs mt-0.5">Visual representation of collected payments per grade level.</p>
-          </div>
+      {/* Form and Chart Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Create / Edit Fee Form */}
+        <div className="lg:col-span-2 bg-slate-800/60 border border-slate-700/60 p-6 rounded-xl space-y-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            {editId ? <Edit className="w-5 h-5 text-indigo-400" /> : <Plus className="w-5 h-5 text-indigo-400" />}
+            {editId ? 'Edit Fee Structure' : 'Create New Fee Structure'}
+          </h2>
 
-          <div className="w-full h-72 my-4 flex items-center justify-center">
-            {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={95}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="#1e293b" strokeWidth={2} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
-                    formatter={(value) => [`৳${value}`, 'Total Revenue']} 
-                  />
-                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: '#94a3b8', fontSize: '13px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
-                <ArrowRightLeft className="w-8 h-8 opacity-40" />
-                <p className="text-sm">No payment record found</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Fee Form Card */}
-        <div className="lg:col-span-6 bg-[#1e293b] p-6 rounded-2xl border border-slate-800 shadow-xl">
-          <div className="mb-5 border-b border-slate-800 pb-3">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-400" />
-              {editId ? 'Update Fee Structure' : 'Create New Fee Structure'}
-            </h2>
-            <p className="text-slate-400 text-xs mt-0.5">Fill in the required information to publish a new fee category.</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                Fee Title
-              </label>
+              <label className="text-xs text-slate-400 mb-1 block">Fee Title</label>
               <input
                 type="text"
-                placeholder="e.g. Midterm Examination Fee 2026"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
                 required
-                className="w-full bg-[#0f172a] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                placeholder="e.g. Monthly Tuition Fee"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Category
-                </label>
-                <select
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full bg-[#0f172a] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                >
-                  <option value="First Exam">First Exam</option>
-                  <option value="Midterm Exam">Midterm Exam</option>
-                  <option value="Final Exam">Final Exam</option>
-                  <option value="Monthly">Monthly Fee</option>
-                  <option value="Others">Others</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Class
-                </label>
-                <select
-                  value={form.className}
-                  onChange={(e) => setForm({ ...form, className: e.target.value })}
-                  className="w-full bg-[#0f172a] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                >
-                  <option value="Class 6">Class 6</option>
-                  <option value="Class 7">Class 7</option>
-                  <option value="Class 8">Class 8</option>
-                  <option value="Class 9">Class 9</option>
-                  <option value="Class 10">Class 10</option>
-                </select>
-              </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Category</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              >
+                <option value="Tuition Fee">Tuition Fee</option>
+                <option value="Exam Fee">Exam Fee</option>
+                <option value="Admission Fee">Admission Fee</option>
+                <option value="Session Fee">Session Fee</option>
+                <option value="Lab Fee">Lab Fee</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
 
-            {/* Dynamic Group Selector for Class 9 & 10 */}
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Amount (BDT)</label>
+              <input
+                type="number"
+                required
+                placeholder="e.g. 1500"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Class</label>
+              <select
+                value={formData.className}
+                onChange={(e) => setFormData({ ...formData, className: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              >
+                {['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'].map((cls) => (
+                  <option key={cls} value={cls}>{cls}</option>
+                ))}
+              </select>
+            </div>
+
             {isGroupApplicable && (
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Academic Group
-                </label>
+                <label className="text-xs text-slate-400 mb-1 block">Group</label>
                 <select
-                  value={form.group}
-                  onChange={(e) => setForm({ ...form, group: e.target.value })}
-                  className="w-full bg-[#0f172a] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                  value={formData.group}
+                  onChange={(e) => setFormData({ ...formData, group: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
                 >
                   <option value="All">All Groups</option>
                   <option value="Science">Science</option>
-                  <option value="Humanities">Humanities</option>
-                  <option value="Business Studies">Business Studies</option>
+                  <option value="Commerce">Commerce</option>
+                  <option value="Arts">Arts</option>
                 </select>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Amount (BDT)
-                </label>
-                <input
-                  type="number"
-                  placeholder="500"
-                  value={form.amount}
-                  onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                  required
-                  className="w-full bg-[#0f172a] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Due Date
-                </label>
-                <input
-                  type="date"
-                  value={form.dueDate}
-                  onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                  required
-                  className="w-full bg-[#0f172a] border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-                />
-              </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Due Date</label>
+              <input
+                type="date"
+                required
+                value={formData.dueDate}
+                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              />
             </div>
 
-            <div className="flex gap-3 pt-3">
-              <button
-                type="submit"
-                className="flex-1 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-xl transition shadow-lg shadow-indigo-600/25"
-              >
-                {editId ? 'Update Fee' : 'Save Fee Structure'}
-              </button>
+            <div className="sm:col-span-2 flex items-end justify-end gap-3 pt-2">
               {editId && (
                 <button
                   type="button"
                   onClick={() => {
                     setEditId(null);
-                    setForm({ title: '', category: 'Midterm Exam', className: 'Class 8', group: 'All', amount: '', dueDate: '' });
+                    setFormData({ title: '', category: 'Tuition Fee', amount: '', className: 'Class 6', group: 'All', dueDate: '' });
                   }}
-                  className="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2.5 rounded-xl transition"
+                  className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded-lg"
                 >
                   Cancel
                 </button>
               )}
+              <button
+                type="submit"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-5 py-2 rounded-lg transition font-medium"
+              >
+                {editId ? 'Update Fee' : 'Save Fee Structure'}
+              </button>
             </div>
           </form>
         </div>
+
+        {/* Analytics Chart */}
+        <div className="bg-slate-800/60 border border-slate-700/60 p-6 rounded-xl flex flex-col justify-between">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <Layers className="w-5 h-5 text-indigo-400" /> Collection Ratio
+          </h2>
+          <div className="h-48 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={75}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
+                  itemStyle={{ color: '#f8fafc' }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
-      {/* --- Section: Fee Structure Table --- */}
-      <div className="bg-[#1e293b] p-6 rounded-2xl border border-slate-800 shadow-xl">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-white">Configured Fee Structures</h2>
-          <p className="text-slate-400 text-xs">List of active fee settings available for students.</p>
+      {/* Payment Tracker & Management Table */}
+      <div className="bg-slate-800/60 border border-slate-700/60 p-6 rounded-xl space-y-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 className="text-lg font-semibold text-white">Payment Status Tracker</h2>
+
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search student or fee..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <select
+              value={filterClass}
+              onChange={(e) => setFilterClass(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            >
+              <option value="All">All Classes</option>
+              {['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'].map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            >
+              <option value="All">All Status</option>
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+          </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="py-3.5 px-4">Title</th>
-                <th className="py-3.5 px-4">Category</th>
-                <th className="py-3.5 px-4">Class</th>
-                <th className="py-3.5 px-4">Group</th>
-                <th className="py-3.5 px-4">Amount</th>
-                <th className="py-3.5 px-4">Due Date</th>
-                <th className="py-3.5 px-4 text-center">Actions</th>
+              <tr className="border-b border-slate-700 text-slate-400 bg-slate-900/50">
+                <th className="p-3">Student Name</th>
+                <th className="p-3">Class</th>
+                <th className="p-3">Fee Title</th>
+                <th className="p-3">Category</th>
+                <th className="p-3">Amount</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm text-slate-300">
-              {fees.length > 0 ? (
-                fees.map((fee) => (
-                  <tr key={fee._id} className="hover:bg-slate-800/40 transition">
-                    <td className="py-3.5 px-4 font-medium text-white">{fee.title}</td>
-                    <td className="py-3.5 px-4">
-                      <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-md text-xs font-medium">
-                        {fee.category}
+            <tbody className="divide-y divide-slate-700/50">
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-6 text-slate-400">Loading payment records...</td>
+                </tr>
+              ) : filteredPayments.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-6 text-slate-400">No payment records found.</td>
+                </tr>
+              ) : (
+                filteredPayments.map((payment) => (
+                  <tr key={payment._id} className="hover:bg-slate-800/40 transition">
+                    <td className="p-3 font-medium text-slate-200">{payment.studentName}</td>
+                    <td className="p-3 text-slate-400">{payment.className}</td>
+                    <td className="p-3 text-slate-400">{payment.feeTitle}</td>
+                    <td className="p-3 text-slate-400">
+                      <span className="bg-slate-800 text-indigo-300 border border-slate-700 px-2 py-0.5 rounded text-xs">
+                        {payment.category || 'Tuition Fee'}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">{fee.className}</td>
-                    <td className="py-3.5 px-4 text-slate-400">{fee.group || 'N/A'}</td>
-                    <td className="py-3.5 px-4 font-semibold text-emerald-400">৳{fee.amount}</td>
-                    <td className="py-3.5 px-4 text-slate-400">{fee.dueDate}</td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex justify-center items-center gap-2">
+                    <td className="p-3 font-semibold text-slate-200">৳ {payment.amount}</td>
+                    <td className="p-3">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        payment.status === 'Paid' 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                          : payment.status === 'Pending'
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                      }`}>
+                        {payment.status}
+                      </span>
+                    </td>
+                    <td className="p-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {payment.status !== 'Paid' && (
+                          <button
+                            onClick={() => handleMarkAsPaid(payment._id)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded-md transition font-medium flex items-center gap-1 shadow-sm"
+                            title="Mark as Paid"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" /> Make Paid
+                          </button>
+                        )}
+
                         <button
-                          onClick={() => handleEditClick(fee)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-700/50 rounded-lg transition"
-                          title="Edit"
+                          onClick={() => handleStatusToggle(payment)}
+                          className="bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-2 py-1 rounded-md transition"
+                          title="Cycle Status"
                         >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(fee._id)}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-lg transition"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
+                          Toggle
                         </button>
                       </div>
                     </td>
                   </tr>
                 ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="text-center py-8 text-slate-500">
-                    No fee structures defined yet.
-                  </td>
-                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* --- Section: Payment Tracking History --- */}
-      <div className="bg-[#1e293b] p-6 rounded-2xl border border-slate-800 shadow-xl">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-pink-500" /> bKash Payment History
-          </h2>
-          <p className="text-slate-400 text-xs">Real-time payment logs submitted by students.</p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="py-3.5 px-4">Student Name</th>
-                <th className="py-3.5 px-4">Class</th>
-                <th className="py-3.5 px-4">Group</th>
-                <th className="py-3.5 px-4">Roll</th>
-                <th className="py-3.5 px-4">Fee Title</th>
-                <th className="py-3.5 px-4">Amount</th>
-                <th className="py-3.5 px-4">Method</th>
-                <th className="py-3.5 px-4">bKash TrxID</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm text-slate-300">
-              {payments.length > 0 ? (
-                payments.map((payment) => (
-                  <tr key={payment._id} className="hover:bg-slate-800/40 transition">
-                    <td className="py-3.5 px-4 font-medium text-white">{payment.studentName}</td>
-                    <td className="py-3.5 px-4">{payment.className}</td>
-                    <td className="py-3.5 px-4 text-slate-400">{payment.group || 'N/A'}</td>
-                    <td className="py-3.5 px-4">{payment.roll}</td>
-                    <td className="py-3.5 px-4 text-slate-300">{payment.feeTitle}</td>
-                    <td className="py-3.5 px-4 font-semibold text-emerald-400">৳{payment.amount}</td>
-                    <td className="py-3.5 px-4">
-                      <span className="text-pink-400 font-medium">{payment.paymentMethod || 'bKash'}</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="font-mono text-xs bg-slate-900 border border-slate-700/60 px-2 py-1 rounded text-slate-300">
-                        {payment.trxID}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2.5 py-1 rounded-full font-medium">
-                        {payment.status || 'Paid'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-400">
-                      {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="10" className="text-center py-8 text-slate-500">
-                    No payment history recorded.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
     </div>
   );
 }
