@@ -5,16 +5,30 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.js");
 const nextConfig = {
   /* config options here */
   
+  // images: {
+  //   remotePatterns: [
+  //     {
+  //       protocol: 'https',
+  //       hostname: '**',
+  //     },
+  //   ],
+  // },
+
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '**',
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i.ibb.co.com",
+        pathname: "/**",
       },
     ],
   },
+  
   reactCompiler: true,
 };
 

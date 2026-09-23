@@ -15,16 +15,40 @@ import "swiper/css/effect-fade";
 export default function HeroSection() {
   const campusImages = [
     {
-      url: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?q=80&w=1200&auto=format&fit=crop",
+      url: "https://i.ibb.co.com/B20ym1nv/Whats-App-Image-2026-09-16-at-10-52-51-PM.jpg",
       title: "Main Campus Building",
     },
     {
-      url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200&auto=format&fit=crop",
+      url: "https://i.ibb.co.com/mFTV8sSB/Whats-App-Image-2026-09-23-at-9-57-02-PM.jpg",
       title: "Digital Classroom Activities",
+    },
+    {
+      url: "https://i.ibb.co.com/Q7qQ5wFz/Whats-App-Image-2026-09-16-at-10-52-58-PM.jpg",
+      title: "Science Lab",
+    },
+    {
+      url: "https://i.ibb.co.com/qYZ2zmDj/Whats-App-Image-2026-09-16-at-10-52-59-PM.jpg",
+      title: "Science & Computer Lab",
+    },
+    {
+      url: "https://i.ibb.co.com/ymFjLtgs/Whats-App-Image-2026-09-16-at-10-53-02-PM.jpg",
+      title: "Science & Computer Lab",
+    },
+    {
+      url: "https://i.ibb.co.com/Df948Ny4/Whats-App-Image-2026-09-16-at-10-53-00-PM.jpg",
+      title: "Science & Computer Lab  || Sir ",
+    },
+    {
+      url: "https://i.ibb.co.com/b5SKYdH5/Whats-App-Image-2026-09-23-at-9-57-03-PM.jpg",
+      title: "Science & Computer Lab",
     },
     {
       url: "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200&auto=format&fit=crop",
       title: "Science & Computer Lab",
+    },
+    {
+      url: "https://i.ibb.co.com/HLYGr564/Whats-App-Image-2026-09-16-at-10-52-54-PM.jpg",
+      title: "Mesra High School",
     },
     {
       url: "https://images.unsplash.com/photo-1526976668912-1a811878dd37?q=80&w=1200&auto=format&fit=crop",

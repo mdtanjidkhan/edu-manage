@@ -8,38 +8,40 @@ export default function AlumniWallOfFame() {
   const alumniList = [
     {
       id: 1,
-      name: "তানজিম আহমেদ",
-      passingYear: "২০১৮",
-      university: "বাংলাদেশ প্রকৌশল বিশ্ববিদ্যালয় (BUET)",
-      profession: "সফটওয়্যার প্রকৌশলী",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop",
-      quote: "এই স্কুলের শৃঙ্খলাই আমাকে আজকের বুয়েটের জীবনে এবং প্রফেশনাল ক্যারিয়ারে সফল হতে সাহায্য করেছে।",
+      name: "আব্দুল আল কাইয়ুম",
+      passingYear: "2022",
+      university: "ZNRF University of Management Sciences (ZUMS)",
+      Education: "B.Sc. in Computer Science & Engineering",
+      image: "https://i.ibb.co.com/XZTjGXRm/Whats-App-Image-2026-09-16-at-7-49-57-PM.jpg",
+      quote: "এই স্কুলে কাটানো দিনগুলো আমাকে শুধু একাডেমিক জ্ঞানই দেয়নি, বরং শৃঙ্খলা, আত্মবিশ্বাস ও দায়িত্ববোধ শিখিয়েছে। আজ আমার উচ্চশিক্ষা ও ক্যারিয়ারের পথে সেই শিক্ষাগুলোই প্রতিনিয়ত কাজে লাগছে।"
+,
     },
     {
-      id: 2,
-      name: "ডাঃ ফারহানা ইয়াসমিন",
-      passingYear: "২০১৭",
-      university: "ঢাকা মেডিকেল কলেজ (DMC)",
-      profession: "মেডিকেল অফিসার",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
-      quote: "শিক্ষকদের অবিরাম দিকনির্দেশনা এবং ল্যাবরেটরির সুযোগ-সুবিধা আমার মেডিকেল ভর্তি পরীক্ষার ভিত্তি গড়ে দিয়েছিল।",
-    },
+  id: 2,
+  name: "আব্দুল আল হাকিম",
+  passingYear: "২০১৭",
+  university: "ঢাকা কলেজ (DC)",
+  Education: "রাষ্ট্রবিজ্ঞান",
+  image: "https://i.ibb.co.com/2YhFL8gB/Whats-App-Image.jpg",
+  quote: "এই প্রতিষ্ঠানে কাটানো সময়গুলো আজও আমার মনে বিশেষভাবে স্মরণীয়। এখানকার শিক্ষা, শৃঙ্খলা ও মূল্যবোধ আমার পরবর্তী জীবনে এগিয়ে চলার পথে অনেকটা অনুপ্রেরণা দিয়েছে।",
+  },
     {
-      id: 3,
-      name: "রাফসান জামান",
-      passingYear: "২০১৯",
-      university: "ঢাকা বিশ্ববিদ্যালয় (DU)",
-      profession: "রিসার্চ এনালিস্ট",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
-      quote: "সাংস্কৃতিক চর্চা ও পড়ালেখার সুন্দর ভারসাম্য এই স্কুলের প্রধান শক্তি। আমি গর্বিত এই প্রতিষ্ঠানের ছাত্র হিসেবে।",
-    },
+   id: 3,
+   name: "আব্দুর রহিম",
+   passingYear: "২০১৯",
+   university: "ঢাকা প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয় (DUET)",
+   Education: "সিভিল ইঞ্জিনিয়ারিং",
+   image: "https://i.ibb.co.com/5XSyGHj2/Abdur-Rohim.jpg",
+   quote: "এই প্রতিষ্ঠানের শিক্ষকদের আন্তরিকতা, শৃঙ্খলা ও সুন্দর পরিবেশ আমার শিক্ষাজীবনের ভিত্তি গড়ে দিয়েছে। এখান থেকে পাওয়া শিক্ষা ও মূল্যবোধ আজও আমার পথচলায় অনুপ্রেরণা হয়ে আছে।",
+   },
+
     {
       id: 4,
       name: "সাদিয়া আফরিন",
-      passingYear: "২০২০",
+      passingYear: "2017",
       university: "জাহাঙ্গীরনগর বিশ্ববিদ্যালয় (JU)",
-      profession: "ডাটা সায়েন্টিস্ট",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop",
+      Education: "ডাটা সায়েন্টিস্ট",
+      image: "https://i.ibb.co.com/ZRtdwZLd/Sarmin-sultana.jpg",
       quote: "কম্পিউটার ল্যাবের দিনগুলো এবং শিক্ষকদের উৎসাহই আমাকে প্রযুক্তির প্রতি আগ্রহী করে তুলেছিল।",
     },
   ];
@@ -99,7 +101,7 @@ export default function AlumniWallOfFame() {
                     </div>
                     <div className="flex items-center gap-2 text-base-content/70">
                       <FaUserCircle className="text-accent shrink-0" />
-                      <span className="truncate">{alumni.profession}</span>
+                      <span className="truncate">{alumni.Education}</span>
                     </div>
                   </div>
 

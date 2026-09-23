@@ -1,5 +1,6 @@
 import AlumniWallOfFame from "@/components/AlumniWallOfFame";
 import CampusLife from "@/components/CampusLife";
+import ContactSection from "@/components/ContactSection";
 import HeadmasterMessage from "@/components/HeadmasterMessage";
 import HeroSection from "@/components/HeroSection";
 import NoticeBoard from "@/components/NoticeBoard";
@@ -17,6 +18,7 @@ export default function Home() {
       <HeadmasterMessage></HeadmasterMessage>
       <Testimonials></Testimonials>
       <AlumniWallOfFame></AlumniWallOfFame>
+      <ContactSection></ContactSection>
     </div>
   );
 }

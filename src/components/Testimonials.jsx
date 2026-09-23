@@ -74,7 +74,7 @@ export default function Testimonials() {
 
                 {/* Comment */}
                 <p className="text-sm sm:text-base text-base-content/80 leading-relaxed italic">
-                  "{item.comment}"
+                  {item.comment}
                 </p>
               </div>
 

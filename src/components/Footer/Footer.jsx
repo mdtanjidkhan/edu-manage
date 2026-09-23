@@ -205,13 +205,12 @@ export default function Footer() {
             {/* Profile Image */}
             <div className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-primary/30 p-1 bg-base-100 shadow-xl">
               <div className="relative w-full h-full rounded-xl overflow-hidden">
-                <Image
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop"
-                  alt="Md Tanzid Hasan"
-                  fill
-                  className="object-cover"
-                  sizes="112px"
-                />
+                
+                <img
+  src="https://i.ibb.co.com/DPdM1Lk9/banner-png.jpg"
+  alt="Md Tanjid Khan"
+  className="w-full h-full object-cover"
+/>
               </div>
             </div>
 

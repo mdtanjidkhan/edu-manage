@@ -14,7 +14,7 @@ export default function CampusLife() {
       type: "video",
       category: "sports",
       title: "Annual Sports Day Highlights",
-      youtubeId: "L_LUpnjgPso", 
+      youtubeId: "JWd0eLAUPg8", 
       thumbnail: "https://images.unsplash.com/photo-1526976668912-1a811878dd37?q=80&w=800&auto=format&fit=crop",
     },
     {
@@ -37,7 +37,7 @@ export default function CampusLife() {
       type: "image",
       category: "sports",
       title: "Inter-School Football Tournament",
-      imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop",
+      imageUrl: "https://i.ibb.co.com/wFpb3cL7/Tanjid-khan.jpg",
     },
     {
       id: 5,
