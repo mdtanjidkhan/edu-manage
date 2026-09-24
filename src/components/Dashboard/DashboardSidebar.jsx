@@ -40,6 +40,7 @@ export default function DashboardSidebar({ children }) {
   // Admin Menu
   const adminMenuItems = [
     { name: "Dashboard", href: "/dashboard/admin", icon: FiHome },
+    { name: "Admission Request", href: "/dashboard/admin/admissions", icon: FiFileText },
     { name: "Users & Roles", href: "/dashboard/admin/users", icon: FiShield },
     { name: "Students", href: "/dashboard/admin/students", icon: FiUsers },
     { name: "Teachers", href: "/dashboard/admin/teachers", icon: FiUsers },
