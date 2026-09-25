@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiUser } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -26,9 +27,9 @@ export default function SignupPage() {
     setLoading(false);
 
     if (error) {
-      alert(error.message || "Signup failed!");
+      toast.error(error.message || "Signup failed!");
     } else {
-      alert("Account created successfully! Please login.");
+      toast.success("Account created successfully! Please login.");
       router.push("/login");
     }
   };

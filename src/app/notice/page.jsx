@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { FiBell, FiCalendar, FiSearch } from "react-icons/fi";
 
 export default function AllNoticesPage() {
@@ -16,6 +17,7 @@ export default function AllNoticesPage() {
         setNotices(data);
       } catch (error) {
         console.error("Notices fetch error:", error);
+        toast.error("Notices fetch error:")
       } finally {
         setLoading(false);
       }

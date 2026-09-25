@@ -18,6 +18,18 @@ export const auth = betterAuth({
         defaultValue: "student", 
         input: false, 
       },
+      studentId: {
+        type: "string",
+        required: false,
+      },
+      class: {
+        type: "string",
+        required: false,
+      },
+      group: {
+        type: "string",
+        required: false,
+      },
     },
   },
   database: mongodbAdapter(db, {

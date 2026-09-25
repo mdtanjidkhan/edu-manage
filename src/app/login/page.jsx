@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,7 +26,7 @@ export default function LoginPage() {
 
     if (error) {
       console.log("Better Auth Error Details:", error);
-      alert(error.message || "Invalid email or password!");
+      toast.error(error.message || "Invalid email or password!");
     } else {
       const session = await authClient.getSession();
       const role = session?.data?.user?.role;
