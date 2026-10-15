@@ -178,6 +178,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FiLock, FiKey } from "react-icons/fi";
+import { authClient } from "@/lib/auth-client";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -207,11 +208,13 @@ function ResetPasswordForm() {
     setErrorMessage("");
 
     try {
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/auth/reset-password`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json",
+             authorization: `Bearer ${tokenData?.token}` },
           body: JSON.stringify({ email, otp, newPassword }),
         }
       );

@@ -622,7 +622,12 @@ const AdmissionPage = () => {
       
       setFetchingStatus(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admission/my-status?email=${user.email}`);
+        const { data: tokenData } = await authClient.token();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admission/my-status?email=${user.email}`, {
+          headers: {
+            authorization: `Bearer ${tokenData?.token}`
+          }
+        });
         const data = await res.json();
         
         if (res.ok && data.success && data.data) {
@@ -657,10 +662,12 @@ const AdmissionPage = () => {
     setErrorMsg('');
 
     try {
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admission/apply`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${tokenData?.token}`
         },
         body: JSON.stringify(formData)
       });

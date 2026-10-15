@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client"; 
+import { authClient, useSession } from "@/lib/auth-client"; 
 import { 
   FiUsers, 
   FiSearch, 
@@ -40,7 +40,12 @@ export default function MyStudentsPage() {
       
       setLoading(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/my-students?teacherEmail=${session.user.email}`);
+        const { data: tokenData } = await authClient.token();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/my-students?teacherEmail=${session.user.email}`, {
+          headers: {
+            authorization: `Bearer ${tokenData?.token}`
+          }
+        });
         const data = await res.json();
 
         if (data.success) {

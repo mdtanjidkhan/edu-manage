@@ -64,8 +64,14 @@ export default function TeacherAssignmentsPage() {
     setActiveSubmissionDetails(null);
 
     try {
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/assignments/${assignment.id}/submissions`
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/assignments/${assignment.id}/submissions`,
+        {
+            headers: {
+              authorization: `Bearer ${tokenData?.token}`
+            }
+          }
       );
       const result = await res.json();
       if (result.success) setSubmissionsList(result.data);

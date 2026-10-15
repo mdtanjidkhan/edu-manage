@@ -9,6 +9,7 @@ import {
   FiAward, FiCheckSquare, FiClock, FiFileText, FiShield,
 } from "react-icons/fi";
 import { MdAssignmentAdd } from "react-icons/md";
+import NotificationBell from "../NotificationBell";
 
 export default function DashboardSidebar({ children }) {
   const router = useRouter();
@@ -111,14 +112,15 @@ export default function DashboardSidebar({ children }) {
           </div>
 
           {/* Right Profile Header */}
-          <div className="flex-none gap-3 sm:gap-4">
+          <div className="flex gap-3 sm:gap-4">
             {/* Notification Button */}
-            <button className="btn btn-ghost btn-circle">
+            {/* <button className="btn btn-ghost btn-circle">
               <div className="indicator">
                 <FiBell size={20} />
                 <span className="badge badge-xs badge-primary indicator-item"></span>
               </div>
-            </button>
+            </button> */}
+            <NotificationBell user={session?.user} />
 
             {/* Profile Dropdown */}
             <div className="dropdown dropdown-end">
@@ -219,3 +221,4 @@ export default function DashboardSidebar({ children }) {
     </div>
   );
 }
+

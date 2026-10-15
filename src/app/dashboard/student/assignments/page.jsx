@@ -18,8 +18,14 @@ export default function StudentAssignmentsPage() {
     if (!session?.user?.email) return;
 
     try {
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/assignments?email=${session.user.email}`
+        `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/assignments?email=${session.user.email}`,
+        {
+          headers: {
+            authorization: `Bearer ${tokenData?.token}`
+          }
+        }
       );
       const result = await res.json();
       if (result.success) setAssignments(result.data);
@@ -64,6 +70,7 @@ export default function StudentAssignmentsPage() {
         setSubmissionText("");
         setFileUrl("");
         fetchAssignments();
+        
       }
     } catch (err) {
       console.error("Submit Assignment Error:", err);

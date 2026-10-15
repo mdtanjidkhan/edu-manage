@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { FiClock, FiMapPin, FiUser, FiCalendar, FiBookOpen } from "react-icons/fi";
 
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -18,8 +18,14 @@ export default function StudentRoutinePage() {
       if (!session?.user?.email) return;
 
       try {
+        const { data: tokenData } = await authClient.token();
         const res = await fetch(
-          `http://localhost:5000/api/student/routine?email=${session.user.email}`
+          `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/student/routine?email=${session.user.email}`,
+          {
+            headers: {
+              authorization: `Bearer ${tokenData?.token}`
+            }
+          }
         );
         const result = await res.json();
         if (result.success) setRoutineData(result.data);

@@ -14,6 +14,7 @@ import {
   FiUser,
   FiHash
 } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 export default function InputMarksPage() {
   const [selectedClass, setSelectedClass] = useState("Class 8");
@@ -82,7 +83,7 @@ export default function InputMarksPage() {
 
     const teacherEmail = session?.user?.email;
     if (!teacherEmail) {
-      alert("Teacher email not found. Please wait for session to load or log in again.");
+      toast.error("Teacher email not found. Please wait for session to load or log in again.");
       return;
     }
 
@@ -118,13 +119,13 @@ export default function InputMarksPage() {
       const data = await res.json();
 
       if (data.success) {
-        alert(hasExistingData ? "Marks updated successfully!" : "Marks saved successfully!");
+        toast.success(hasExistingData ? "Marks updated successfully!" : "Marks saved successfully!");
         setHasExistingData(true);
       } else {
-        alert(data.message || "Failed to save marks.");
+        toast.error(data.message || "Failed to save marks.");
       }
     } catch (err) {
-      alert("Server error while saving marks.");
+      toast.error("Server error while saving marks.");
     } finally {
       setIsSubmitting(false);
     }
@@ -146,14 +147,14 @@ export default function InputMarksPage() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Marks deleted successfully!");
+        toast.success("Marks deleted successfully!");
         setMarksData({});
         setHasExistingData(false);
       } else {
-        alert(data.message || "Failed to delete marks.");
+        toast.error(data.message || "Failed to delete marks.");
       }
     } catch (err) {
-      alert("Server error while deleting marks.");
+      toast.error("Server error while deleting marks.");
     } finally {
       setIsSubmitting(false);
     }

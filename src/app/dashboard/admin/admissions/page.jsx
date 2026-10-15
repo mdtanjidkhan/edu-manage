@@ -61,7 +61,12 @@ const AdminAdmissionDashboard = () => {
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/stats/count`);
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/stats/count`, {
+        headers: {
+          authorization: `Bearer ${tokenData?.token}`
+        }
+      });
       const data = await res.json();
       if (res.ok && data.success && data.stats) {
         setStats({
@@ -91,8 +96,12 @@ const AdminAdmissionDashboard = () => {
         ...(applyingClass && { applyingClass }),
         ...(group && { group })
       });
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/applications?${queryParams}`);
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/applications?${queryParams}`, {
+        headers: {
+          authorization: `Bearer ${tokenData?.token}`
+        }
+      });
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -121,9 +130,12 @@ const AdminAdmissionDashboard = () => {
   const handleApprove = async (id) => {
     setActionLoading(true);
     try {
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/approve/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json',
+          authorization: `Bearer ${tokenData?.token}`
+         }
       });
       const data = await res.json();
 
@@ -148,9 +160,12 @@ const AdminAdmissionDashboard = () => {
 
     setActionLoading(true);
     try {
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/reject/${rejectModalApp._id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+          authorization: `Bearer ${tokenData?.token}`
+         },
         body: JSON.stringify({ rejectionReason })
       });
       const data = await res.json();

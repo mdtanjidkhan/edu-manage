@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { authClient, useSession } from "@/lib/auth-client"; 
 import { FiClock, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 export default function TeacherCheckInPage() {
   const { data: session } = useSession();
@@ -16,15 +17,23 @@ export default function TeacherCheckInPage() {
       if (!session?.user?.email) return;
 
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/attendance-status?teacherEmail=${session.user.email}`);
+        const { data: tokenData } = await authClient.token();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/teacher/attendance-status?teacherEmail=${session.user.email}`,
+          {
+            headers: {
+              authorization: `Bearer ${tokenData?.token}`
+            }
+          }
+        );
         const data = await res.json();
 
         if (data.success) {
           setHasCheckedIn(data.hasCheckedIn);
           setAttendance(data.attendance);
+         
         }
       } catch (err) {
-        console.error("Failed to fetch attendance status:", err);
+        toast.error("Failed to fetch attendance status:", err);
       } finally {
         setLoading(false);
       }
