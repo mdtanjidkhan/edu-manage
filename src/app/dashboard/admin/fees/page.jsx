@@ -26,6 +26,9 @@ export default function FeeManagement() {
   // Edit Mode States
   const [editId, setEditId] = useState(null);
 
+  // Delete Modal State  [NEW ADDITION]
+  const [deleteModalId, setDeleteModalId] = useState(null);
+
   // Form State
   const [formData, setFormData] = useState({
     title: '',
@@ -123,11 +126,12 @@ export default function FeeManagement() {
       group: fee.group || 'All',
       dueDate: fee.dueDate ? fee.dueDate.split('T')[0] : '',
     });
+    // Smooth scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Delete Fee Handler
   const handleDeleteFee = async (id) => {
-    if (!confirm('Are you sure you want to delete this fee structure?')) return;
     try {
       const { data: tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/fees/${id}`, {
@@ -137,6 +141,7 @@ export default function FeeManagement() {
 
       if (res.ok) {
         toast.success('Fee structure deleted!');
+        setDeleteModalId(null); // Close modal on success
         fetchData();
       } else {
         toast.error('Failed to delete fee');
@@ -248,7 +253,7 @@ export default function FeeManagement() {
         </div>
         <button
           onClick={fetchData}
-          className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm border border-slate-700 transition"
+          className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm border border-slate-700 transition cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Data
         </button>
@@ -385,14 +390,14 @@ export default function FeeManagement() {
                     setEditId(null);
                     setFormData({ title: '', category: 'Tuition Fee', amount: '', className: 'Class 6', group: 'All', dueDate: '' });
                   }}
-                  className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded-lg"
+                  className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
               )}
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-5 py-2 rounded-lg transition font-medium"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-5 py-2 rounded-lg transition font-medium cursor-pointer"
               >
                 {editId ? 'Update Fee' : 'Save Fee Structure'}
               </button>
@@ -429,6 +434,74 @@ export default function FeeManagement() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      {/* 👈 [NEW ADDITION] Created Fee Structures List (Where Edit & Delete buttons live) */}
+      <div className="bg-slate-800/60 border border-slate-700/60 p-6 rounded-xl space-y-4">
+        <h2 className="text-lg font-semibold text-white">Active Fee Structures</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-slate-700 text-slate-400 bg-slate-900/50">
+                <th className="p-3">Title</th>
+                <th className="p-3">Category</th>
+                <th className="p-3">Class</th>
+                <th className="p-3">Group</th>
+                <th className="p-3">Amount</th>
+                <th className="p-3">Due Date</th>
+                <th className="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-700/50">
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-6 text-slate-400">Loading fee structures...</td>
+                </tr>
+              ) : fees.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-6 text-slate-400">No fee structures created yet.</td>
+                </tr>
+              ) : (
+                fees.map((fee) => (
+                  <tr key={fee._id} className="hover:bg-slate-800/40 transition">
+                    <td className="p-3 font-medium text-slate-200">{fee.title}</td>
+                    <td className="p-3 text-slate-400">
+                      <span className="bg-slate-800 text-indigo-300 border border-slate-700 px-2 py-0.5 rounded text-xs">
+                        {fee.category || 'Tuition Fee'}
+                      </span>
+                    </td>
+                    <td className="p-3 text-slate-400">{fee.className}</td>
+                    <td className="p-3 text-slate-400">{fee.group || 'All'}</td>
+                    <td className="p-3 font-semibold text-slate-200">৳ {fee.amount}</td>
+                    <td className="p-3 text-slate-400">
+                      {fee.dueDate ? new Date(fee.dueDate).toLocaleDateString() : 'N/A'}
+                    </td>
+                    <td className="p-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => handleEditClick(fee)}
+                          className="p-1.5 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-lg transition cursor-pointer"
+                          title="Edit Fee"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        {/* Delete Button (Triggers Modal) */}
+                        <button
+                          onClick={() => setDeleteModalId(fee._id)}
+                          className="p-1.5 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white rounded-lg transition cursor-pointer"
+                          title="Delete Fee"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -525,7 +598,7 @@ export default function FeeManagement() {
                         {payment.status !== 'Paid' && (
                           <button
                             onClick={() => handleMarkAsPaid(payment._id)}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded-md transition font-medium flex items-center gap-1 shadow-sm"
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded-md transition font-medium flex items-center gap-1 shadow-sm cursor-pointer"
                             title="Mark as Paid"
                           >
                             <CheckCircle className="w-3.5 h-3.5" /> Make Paid
@@ -534,7 +607,7 @@ export default function FeeManagement() {
 
                         <button
                           onClick={() => handleStatusToggle(payment)}
-                          className="bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-2 py-1 rounded-md transition"
+                          className="bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-2 py-1 rounded-md transition cursor-pointer"
                           title="Cycle Status"
                         >
                           Toggle
@@ -548,6 +621,34 @@ export default function FeeManagement() {
           </table>
         </div>
       </div>
+
+      {/* 👈 [NEW ADDITION] Delete Confirmation Modal */}
+      {deleteModalId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-rose-500" /> Confirm Delete
+            </h3>
+            <p className="text-slate-300 text-sm">
+              Are you sure you want to delete this fee structure? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setDeleteModalId(null)}
+                className="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-lg text-sm cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteFee(deleteModalId)}
+                className="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-lg text-sm transition font-medium cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

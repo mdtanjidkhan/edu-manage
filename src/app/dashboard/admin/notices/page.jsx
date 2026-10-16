@@ -1,23 +1,25 @@
+
 "use client";
 import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast"; // 👈 react-hot-toast Import
 import { 
   FiBell, 
   FiPlus, 
   FiTrash2, 
   FiCalendar, 
   FiUsers, 
-  FiCheckCircle, 
   FiEdit3, 
-  FiX 
+  FiX,
+  FiAlertTriangle
 } from "react-icons/fi";
 
 export default function AdminNoticesPage() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [toastMsg, setToastMsg] = useState("");
   const [editingId, setEditingId] = useState(null); // Track notice being edited
+  const [deleteCandidate, setDeleteCandidate] = useState(null); // 👈 Delete Modal State
 
   const [formData, setFormData] = useState({
     title: "",
@@ -36,6 +38,7 @@ export default function AdminNoticesPage() {
       }
     } catch (err) {
       console.error("Failed to fetch notices:", err);
+      toast.error("Failed to load notices!");
     } finally {
       setLoading(false);
     }
@@ -74,62 +77,64 @@ export default function AdminNoticesPage() {
     const method = isEdit ? "PATCH" : "POST";
 
     try {
-       const { data: tokenData,error: tokenError } = await authClient.token();
+      const { data: tokenData, error: tokenError } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json",
-           authorization: `Bearer ${tokenData?.token}`
-         },
+        headers: { 
+          "Content-Type": "application/json",
+          authorization: `Bearer ${tokenData?.token}`
+        },
         body: JSON.stringify(formData)
       });
       const data = await res.json();
 
       if (data.success) {
         handleCancelEdit();
-        setToastMsg(isEdit ? "Notice updated successfully!" : "Notice published successfully!");
-        setTimeout(() => setToastMsg(""), 3000);
+        toast.success(isEdit ? "Notice updated successfully!" : "Notice published successfully!");
         fetchNotices();
+      } else {
+        toast.error(data.message || "Failed to save notice.");
       }
     } catch (err) {
       console.error("Error saving notice:", err);
+      toast.error("Server error occurred!");
     } finally {
       setSubmitting(false);
     }
   };
 
   // Handle Delete Notice
-  const handleDelete = async (id) => {
-    // if (!confirm("Are you sure you want to delete this notice?")) return;
+  const handleDelete = async () => {
+    if (!deleteCandidate) return;
+    setSubmitting(true);
 
     try {
-       const { data: tokenData,error: tokenError } = await authClient.token();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/notices/${id}`, {
+      const { data: tokenData, error: tokenError } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/notices/${deleteCandidate._id}`, {
         method: "DELETE",
-         headers: { "Content-Type": "application/json",
+        headers: { 
+          "Content-Type": "application/json",
           authorization: `Bearer ${tokenData?.token}`
-          },
+        },
       });
       const data = await res.json();
       if (data.success) {
+        toast.success("Notice deleted successfully!");
+        setDeleteCandidate(null);
         fetchNotices();
+      } else {
+        toast.error(data.message || "Failed to delete notice.");
       }
     } catch (err) {
       console.error("Delete error:", err);
+      toast.error("Server error while deleting.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-10">
-      {/* Toast Notification */}
-      {toastMsg && (
-        <div className="toast toast-top toast-end z-50">
-          <div className="alert alert-success text-white shadow-lg rounded-xl flex items-center gap-2">
-            <FiCheckCircle size={18} />
-            <span className="text-sm font-semibold">{toastMsg}</span>
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-base-content flex items-center gap-2.5">
@@ -280,7 +285,7 @@ export default function AdminNoticesPage() {
                         <FiEdit3 size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(notice._id)}
+                        onClick={() => setDeleteCandidate(notice)}
                         className="btn btn-ghost btn-xs text-error hover:bg-error/10 rounded-lg p-1"
                         title="Delete Notice"
                       >
@@ -302,6 +307,35 @@ export default function AdminNoticesPage() {
           )}
         </div>
       </div>
+
+      {/*  CONFIRM DELETE MODAL */}
+      {deleteCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-base-100 rounded-2xl border border-base-300 p-6 w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 className="font-bold text-lg text-error flex items-center gap-2">
+              <FiAlertTriangle className="text-error" /> Confirm Delete
+            </h3>
+            <p className="text-xs sm:text-sm text-base-content/80 leading-relaxed">
+              Are you sure you want to delete notice <span className="font-semibold text-base-content">"{deleteCandidate.title}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2 pt-2 border-t border-base-200">
+              <button 
+                onClick={() => setDeleteCandidate(null)} 
+                className="btn btn-ghost btn-sm rounded-xl"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDelete} 
+                disabled={submitting} 
+                className="btn btn-error btn-sm text-white rounded-xl shadow-md"
+              >
+                {submitting ? "Deleting..." : "Delete Notice"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

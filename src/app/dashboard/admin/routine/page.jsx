@@ -1,6 +1,8 @@
+
 "use client";
 import { authClient } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast"; 
 import { 
   FiClock, 
   FiPlus, 
@@ -10,7 +12,8 @@ import {
   FiBookOpen, 
   FiUser, 
   FiMapPin,
-  FiCalendar
+  FiCalendar,
+  FiAlertTriangle
 } from "react-icons/fi";
 
 export default function AdminRoutinePage() {
@@ -22,7 +25,7 @@ export default function AdminRoutinePage() {
   const [selectedClass, setSelectedClass] = useState("All");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editId, setEditId] = useState(null); // Track if Editing or Adding
+  const [editId, setEditId] = useState(null); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState(null);
 
@@ -48,6 +51,7 @@ export default function AdminRoutinePage() {
       if (data.success) setRoutines(data.routines);
     } catch (err) {
       console.error("Error fetching routines:", err);
+      toast.error("Failed to load routines!");
     } finally {
       setLoading(false);
     }
@@ -113,23 +117,26 @@ export default function AdminRoutinePage() {
     const method = editId ? "PUT" : "POST";
 
     try {
-       const { data: tokenData,error: tokenError } = await authClient.token();
+      const { data: tokenData, error: tokenError } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json",
-           authorization: `Bearer ${tokenData?.token}` },
+        headers: { 
+          "Content-Type": "application/json",
+          authorization: `Bearer ${tokenData?.token}` 
+        },
         body: JSON.stringify(formData)
       });
       const data = await res.json();
 
       if (data.success) {
+        toast.success(editId ? "Routine schedule updated!" : "New routine schedule added!");
         setIsModalOpen(false);
         fetchRoutines();
       } else {
-        alert(data.message || "Failed to save routine.");
+        toast.error(data.message || "Failed to save routine.");
       }
     } catch (err) {
-      alert("Server error.");
+      toast.error("Server error occurred!");
     } finally {
       setIsSubmitting(false);
     }
@@ -140,7 +147,7 @@ export default function AdminRoutinePage() {
     setIsSubmitting(true);
 
     try {
-       const { data: tokenData,error: tokenError } = await authClient.token();
+      const { data: tokenData, error: tokenError } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/routine/${deleteCandidate._id}`, {
         method: "DELETE",
         headers: { authorization: `Bearer ${tokenData?.token}` }
@@ -148,13 +155,14 @@ export default function AdminRoutinePage() {
       const data = await res.json();
 
       if (data.success) {
+        toast.success("Schedule deleted successfully!");
         setDeleteCandidate(null);
         fetchRoutines();
       } else {
-        alert(data.message || "Delete failed.");
+        toast.error(data.message || "Delete failed.");
       }
     } catch (err) {
-      alert("Server error while deleting.");
+      toast.error("Server error while deleting.");
     } finally {
       setIsSubmitting(false);
     }
@@ -417,18 +425,27 @@ export default function AdminRoutinePage() {
 
       {/* --- CONFIRM DELETE MODAL --- */}
       {deleteCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-base-100 rounded-2xl p-5 w-full max-w-sm space-y-3">
-            <h3 className="font-bold text-error">Confirm Delete</h3>
-            <p className="text-xs text-base-content/70">
-              Are you sure you want to remove {deleteCandidate.subjectName} class schedule for {deleteCandidate.day}?
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-base-100 rounded-2xl border border-base-300 p-6 w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 className="font-bold text-lg text-error flex items-center gap-2">
+              <FiAlertTriangle className="text-error" /> Confirm Delete
+            </h3>
+            <p className="text-xs sm:text-sm text-base-content/80 leading-relaxed">
+              Are you sure you want to remove <span className="font-semibold text-base-content">{deleteCandidate.subjectName}</span> class schedule for <span className="font-semibold text-base-content">{deleteCandidate.day}</span> ({deleteCandidate.classId})?
             </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <button onClick={() => setDeleteCandidate(null)} className="btn btn-ghost btn-sm rounded-xl">
+            <div className="flex justify-end gap-2 pt-2 border-t border-base-200">
+              <button 
+                onClick={() => setDeleteCandidate(null)} 
+                className="btn btn-ghost btn-sm rounded-xl"
+              >
                 Cancel
               </button>
-              <button onClick={handleDelete} disabled={isSubmitting} className="btn btn-error btn-sm text-white rounded-xl">
-                Delete
+              <button 
+                onClick={handleDelete} 
+                disabled={isSubmitting} 
+                className="btn btn-error btn-sm text-white rounded-xl shadow-md"
+              >
+                {isSubmitting ? "Deleting..." : "Delete Schedule"}
               </button>
             </div>
           </div>
