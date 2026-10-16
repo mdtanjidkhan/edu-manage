@@ -40,7 +40,12 @@ export default function ManageTeachersPage() {
 
   const fetchTeachers = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers`);
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers`,{
+         headers: {
+          authorization: `Bearer ${tokenData?.token}`
+        }
+      });
       const data = await res.json();
       if (data.success) {
         setTeachers(data.teachers);

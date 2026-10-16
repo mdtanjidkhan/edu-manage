@@ -44,7 +44,12 @@ export default function ManageStudentsPage() {
 
   const fetchStudents = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students`);
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students`,{
+         headers: {
+          authorization: `Bearer ${tokenData?.token}`
+        }
+      });
       const data = await res.json();
       // console.log(data)
       if (data.success) {

@@ -7,6 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import { 
   FiBell, FiUser, FiLogOut, FiLayout, FiMenu, FiX, FiGlobe 
 } from "react-icons/fi";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -122,13 +123,8 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 
                 {/* Notifications Button */}
-                <button className="btn btn-ghost btn-circle sm:flex">
-                  <div className="indicator">
-                    <FiBell size={20} />
-                    <span className="badge badge-xs badge-primary indicator-item"></span>
-                  </div>
-                </button>
-
+                
+                <NotificationBell user={user}></NotificationBell>
                 {/* User Avatar & Desktop Dropdown */}
                 <div className="dropdown dropdown-end">
                   <div
@@ -319,6 +315,8 @@ export default function Navbar() {
     </>
   );
 }
+
+
 
 
 

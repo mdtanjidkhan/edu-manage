@@ -1,5 +1,6 @@
 
 "use client";
+import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import { 
   FiCalendar, 
@@ -28,11 +29,16 @@ export default function AdminAttendancePage() {
   const fetchAttendance = async () => {
     setLoading(true);
     try {
+      const { data: tokenData } = await authClient.token();
       const endpoint = activeTab === "students" 
         ? `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/attendance/students?date=${selectedDate}&subject=${selectedSubject}`
         : `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/attendance/teachers?date=${selectedDate}`;
 
-      const res = await fetch(endpoint);
+      const res = await fetch(endpoint, {
+        headers: {
+          authorization: `Bearer ${tokenData?.token}`
+        }
+      });
       const data = await res.json();
       
       if (data.success) {

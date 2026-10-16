@@ -31,7 +31,12 @@ export default function AdminNoticesPage() {
   // Fetch Notices
   const fetchNotices = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/notices`);
+      const { data: tokenData } = await authClient.token();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/notices`, {
+        headers: {
+          authorization: `Bearer ${tokenData?.token}`
+        }
+      });
       const data = await res.json();
       if (data.success) {
         setNotices(data.notices || []);

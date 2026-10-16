@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { FiMail } from "react-icons/fi";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
+
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -20,11 +20,11 @@ export default function ForgotPasswordPage() {
     setErrorMessage("");
 
     try {
-      const { data: tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
-           authorization: `Bearer ${tokenData?.token}` },
+          
+           },
         body: JSON.stringify({ email }),
       });
 

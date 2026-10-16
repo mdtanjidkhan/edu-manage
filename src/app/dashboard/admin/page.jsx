@@ -11,6 +11,7 @@ import {
   FiArrowRight,
   FiActivity
 } from "react-icons/fi";
+import { authClient } from "@/lib/auth-client";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
@@ -21,7 +22,14 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/stats`);
+        const { data: tokenData } = await authClient.token();
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/stats`,
+         {
+           headers: {
+          authorization: `Bearer ${tokenData?.token}`
+        }
+         }
+        );
         const data = await response.json();
 
         if (data.success) {
