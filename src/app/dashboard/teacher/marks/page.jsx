@@ -33,7 +33,12 @@ export default function InputMarksPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students?classId=${selectedClass}`);
+       const { data: tokenData,error: tokenError } = await authClient.token();
+      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/students?classId=${selectedClass}`,{
+        headers:{
+          authorization: `Bearer ${tokenData?.token}`
+        }
+      });
       const studentData = await studentRes.json();
 
       const marksRes = await fetch(

@@ -1,7 +1,8 @@
 
+
 "use client";
 import { authClient } from "@/lib/auth-client";
-import { useEffect, useState } from "react";
+import { useEffect, useState,Fragment } from "react";
 import { 
   FiCalendar, 
   FiCheckCircle, 
@@ -11,11 +12,14 @@ import {
   FiUserCheck,
   FiUsers,
   FiBriefcase,
-  FiMail
+  FiMail,
+  FiChevronDown,
+  FiChevronUp,
+  FiUser
 } from "react-icons/fi";
 
 export default function AdminAttendancePage() {
-  const [activeTab, setActiveTab] = useState("students"); // 'students' or 'teachers'
+  const [activeTab, setActiveTab] = useState("students");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -24,6 +28,9 @@ export default function AdminAttendancePage() {
   const [studentRecords, setStudentRecords] = useState([]);
   const [teacherRecords, setTeacherRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Track expanded class row for student details
+  const [expandedRowId, setExpandedRowId] = useState(null);
 
   // Fetch Attendance Data
   const fetchAttendance = async () => {
@@ -59,25 +66,37 @@ export default function AdminAttendancePage() {
     fetchAttendance();
   }, [selectedDate, selectedSubject, activeTab]);
 
+  const toggleRowExpand = (id) => {
+    setExpandedRowId(expandedRowId === id ? null : id);
+  };
+
   // Client-side search filtering
   const filteredStudentRecords = studentRecords.filter((item) => {
-    return (
-      item.subjectName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.teacherName?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSubjectOrTeacher = 
+      item.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.teacherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.classId?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStudentInside = item.records?.some((student) => 
+      student.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.roll?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    return matchesSubjectOrTeacher || matchesStudentInside;
   });
 
   const filteredTeacherRecords = teacherRecords.filter((item) => {
     return (
       item.teacherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.teacherEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.teacherId?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
   // Calculations for Student Stats
-  const totalStudents = studentRecords.reduce((acc, curr) => acc + (curr.students?.length || 0), 0);
+  const totalStudents = studentRecords.reduce((acc, curr) => acc + (curr.records?.length || 0), 0);
   const totalStudentsPresent = studentRecords.reduce((acc, curr) => {
-    return acc + (curr.students?.filter((s) => s.status === "Present").length || 0);
+    return acc + (curr.records?.filter((s) => s.status === "Present").length || 0);
   }, 0);
   const studentPresentPercent = totalStudents > 0 ? Math.round((totalStudentsPresent / totalStudents) * 100) : 0;
 
@@ -101,7 +120,10 @@ export default function AdminAttendancePage() {
       {/* Navigation Tabs */}
       <div className="flex border-b border-base-300 gap-2">
         <button
-          onClick={() => setActiveTab("students")}
+          onClick={() => {
+            setActiveTab("students");
+            setExpandedRowId(null);
+          }}
           className={`flex items-center gap-2 py-3 px-5 font-semibold text-sm rounded-t-xl transition-all border-b-2 ${
             activeTab === "students"
               ? "border-primary text-primary bg-primary/5"
@@ -112,7 +134,10 @@ export default function AdminAttendancePage() {
         </button>
 
         <button
-          onClick={() => setActiveTab("teachers")}
+          onClick={() => {
+            setActiveTab("teachers");
+            setExpandedRowId(null);
+          }}
           className={`flex items-center gap-2 py-3 px-5 font-semibold text-sm rounded-t-xl transition-all border-b-2 ${
             activeTab === "teachers"
               ? "border-primary text-primary bg-primary/5"
@@ -123,10 +148,9 @@ export default function AdminAttendancePage() {
         </button>
       </div>
 
-      {/* Filter and Control Bar */}
+      {/* Filter Bar */}
       <div className="bg-base-100 border border-base-300 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          {/* Date Picker */}
           <div className="w-full sm:w-auto">
             <input
               type="date"
@@ -136,7 +160,6 @@ export default function AdminAttendancePage() {
             />
           </div>
 
-          {/* Subject Filter (Only shown for Students tab) */}
           {activeTab === "students" && (
             <div className="w-full sm:w-auto">
               <select
@@ -145,23 +168,22 @@ export default function AdminAttendancePage() {
                 className="select select-bordered w-full rounded-xl text-sm focus:outline-none focus:border-primary"
               >
                 <option value="All">All Subjects</option>
+                <option value="Electrical Circuits">Electrical Circuits</option>
                 <option value="Mathematics">Mathematics</option>
                 <option value="General Science">General Science</option>
                 <option value="English">English</option>
                 <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
                 <option value="ICT">ICT</option>
               </select>
             </div>
           )}
         </div>
 
-        {/* Search */}
         <div className="relative w-full md:w-72">
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40" size={18} />
           <input
             type="text"
-            placeholder={activeTab === "students" ? "Search subject or teacher..." : "Search teacher name or email..."}
+            placeholder={activeTab === "students" ? "Search subject, teacher, student..." : "Search teacher..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="input input-bordered w-full pl-10 rounded-xl text-sm focus:outline-none focus:border-primary"
@@ -214,7 +236,7 @@ export default function AdminAttendancePage() {
         </div>
       </div>
 
-      {/* Attendance Tables */}
+      {/* Tables Section */}
       <div className="bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-12 gap-3">
@@ -222,7 +244,6 @@ export default function AdminAttendancePage() {
             <p className="text-sm text-base-content/60">Fetching attendance logs...</p>
           </div>
         ) : activeTab === "students" ? (
-          /* TAB 1: STUDENT ATTENDANCE TABLE */
           filteredStudentRecords.length === 0 ? (
             <div className="text-center p-12 text-base-content/60 space-y-2">
               <FiClock size={32} className="mx-auto text-base-content/30" />
@@ -233,37 +254,99 @@ export default function AdminAttendancePage() {
               <table className="table w-full">
                 <thead className="bg-base-200/50 text-base-content/70 text-xs font-semibold uppercase">
                   <tr>
-                    <th>Subject</th>
+                    <th>Class & Subject</th>
                     <th>Teacher Name</th>
                     <th>Present / Total</th>
-                    <th>Percentage</th>
+                    <th>Attendance %</th>
                     <th>Date</th>
+                    <th className="text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-base-200 text-sm">
-                  {filteredStudentRecords.map((item, idx) => {
-                    const present = item.students?.filter((s) => s.status === "Present").length || 0;
-                    const total = item.students?.length || 0;
+                  {filteredStudentRecords.map((item) => {
+                    const present = item.records?.filter((s) => s.status === "Present").length || 0;
+                    const total = item.records?.length || 0;
                     const percent = total > 0 ? Math.round((present / total) * 100) : 0;
+                    const isExpanded = expandedRowId === item._id;
 
                     return (
-                      <tr key={item._id || idx} className="hover:bg-base-200/30 transition-colors">
-                        <td>
-                          <div className="font-bold text-base-content">{item.subject || "N/A"}</div>
-                        </td>
-                        <td>
-                          <span className="font-semibold text-base-content/80">{item.teacherName || "N/A"}</span>
-                        </td>
-                        <td>
-                          <span className="font-semibold text-success">{present}</span> / {total}
-                        </td>
-                        <td>
-                          <span className={`badge badge-sm font-bold ${percent >= 75 ? 'badge-success' : 'badge-warning'}`}>
-                            {percent}%
-                          </span>
-                        </td>
-                        <td className="text-xs text-base-content/60">{item.date}</td>
-                      </tr>
+                     <Fragment key={item._id}>
+                      <tr 
+                          
+                          onClick={() => toggleRowExpand(item._id)}
+                          className="hover:bg-base-200/40 transition-colors cursor-pointer"
+                        >
+                          <td>
+                            <div>
+                              <div className="font-bold text-base-content">{item.subject || "N/A"}</div>
+                              <div className="text-xs text-primary font-medium">{item.classId} ({item.group})</div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="font-semibold text-base-content/80">{item.teacherName || "N/A"}</div>
+                            <div className="text-[11px] text-base-content/50">{item.teacherEmail}</div>
+                          </td>
+                          <td>
+                            <span className="font-semibold text-success">{present}</span> / {total}
+                          </td>
+                          <td>
+                            <span className={`badge badge-sm font-bold ${percent >= 75 ? 'badge-success' : 'badge-warning'}`}>
+                              {percent}%
+                            </span>
+                          </td>
+                          <td className="text-xs text-base-content/60">{item.date}</td>
+                          <td className="text-right">
+                            <button className="btn btn-ghost btn-xs btn-circle">
+                              {isExpanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+                            </button>
+                          </td>
+                        </tr>
+
+                        {/* Expanded Student List */}
+                        {isExpanded && (
+                          <tr className="bg-base-200/30">
+                            <td colSpan={6} className="p-4 sm:p-6">
+                              <div className="bg-base-100 border border-base-300 rounded-xl p-4 space-y-3">
+                                <div className="flex items-center justify-between border-b border-base-200 pb-2">
+                                  <h4 className="font-bold text-xs uppercase text-primary tracking-wider flex items-center gap-1.5">
+                                    <FiUsers size={14} /> Student Attendance Details
+                                  </h4>
+                                  <span className="text-xs text-base-content/60 font-medium">
+                                    Total: {total} | Present: {present} | Absent: {total - present}
+                                  </span>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                  {item.records?.map((st) => (
+                                    <div 
+                                      key={st.studentId}
+                                      className="p-2.5 rounded-lg border border-base-200 bg-base-100 flex items-center justify-between gap-2 text-xs"
+                                    >
+                                      <div className="flex items-center gap-2 truncate">
+                                        <div className="p-1.5 rounded-full bg-base-200 text-base-content/60">
+                                          <FiUser size={12} />
+                                        </div>
+                                        <div className="truncate">
+                                          <p className="font-bold text-base-content truncate">{st.studentName}</p>
+                                          <p className="text-[10px] text-base-content/50">Roll: {st.roll}</p>
+                                        </div>
+                                      </div>
+
+                                      <span className={`badge badge-sm font-bold ${
+                                        st.status === "Present" 
+                                          ? "badge-success text-white" 
+                                          : "badge-error text-white"
+                                      }`}>
+                                        {st.status}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                     </Fragment>
                     );
                   })}
                 </tbody>
@@ -271,7 +354,6 @@ export default function AdminAttendancePage() {
             </div>
           )
         ) : (
-          /* TAB 2: TEACHER ATTENDANCE TABLE */
           filteredTeacherRecords.length === 0 ? (
             <div className="text-center p-12 text-base-content/60 space-y-2">
               <FiClock size={32} className="mx-auto text-base-content/30" />
@@ -296,10 +378,10 @@ export default function AdminAttendancePage() {
                       <td>
                         <div className="flex items-center gap-1.5 text-xs text-base-content/70">
                           <FiMail size={14} className="text-base-content/40" />
-                          <span>{item.teacherId || "N/A"}</span>
+                          <span>{item.teacherEmail || item.teacherId || "N/A"}</span>
                         </div>
                       </td>
-                      <td className="text-xs font-mono">{item.inTime || item.checkInTime || "N/A"}</td>
+                      <td className="text-xs font-mono">{item.inTime || item.checkInTime || "09:00 AM"}</td>
                       <td>
                         <span className={`badge badge-sm font-bold ${
                           item.status === "Present" 

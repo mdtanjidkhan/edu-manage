@@ -1,3 +1,4 @@
+
 "use client";
 import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
@@ -12,7 +13,9 @@ import {
   FiBriefcase,
   FiX,
   FiEdit2,
-  FiTrash2
+  FiTrash2,
+  FiAward,
+  FiPhone
 } from "react-icons/fi";
 
 export default function ManageTeachersPage() {
@@ -35,20 +38,22 @@ export default function ManageTeachersPage() {
     email: "",
     password: "",
     designation: "Assistant Teacher",
-    subject: "Mathematics"
+    subject: "Mathematics",
+    qualification: "",
+    phone: ""
   });
 
   const fetchTeachers = async () => {
     try {
       const { data: tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers`,{
-         headers: {
+        headers: {
           authorization: `Bearer ${tokenData?.token}`
         }
       });
       const data = await res.json();
       if (data.success) {
-        setTeachers(data.teachers);
+        setTeachers(data.teachers || []);
       }
     } catch (err) {
       console.error("Error fetching teachers:", err);
@@ -73,7 +78,9 @@ export default function ManageTeachersPage() {
       email: "",
       password: "",
       designation: "Assistant Teacher",
-      subject: "Mathematics"
+      subject: "Mathematics",
+      qualification: "",
+      phone: ""
     });
     setFormError("");
     setFormSuccess("");
@@ -88,7 +95,9 @@ export default function ManageTeachersPage() {
       email: teacher.email || "",
       password: "",
       designation: teacher.designation || "Assistant Teacher",
-      subject: teacher.subject || "Mathematics"
+      subject: teacher.subject || "Mathematics",
+      qualification: teacher.qualification || "",
+      phone: teacher.phone || ""
     });
     setFormError("");
     setFormSuccess("");
@@ -108,10 +117,13 @@ export default function ManageTeachersPage() {
     const method = isEditMode ? "PUT" : "POST";
 
     try {
-      const { data: tokenData,error: tokenError } = await authClient.token();
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json", authorization: `Bearer ${tokenData?.token}` },
+        headers: { 
+          "Content-Type": "application/json", 
+          authorization: `Bearer ${tokenData?.token}` 
+        },
         body: JSON.stringify(formData)
       });
 
@@ -139,7 +151,7 @@ export default function ManageTeachersPage() {
     setIsSubmitting(true);
 
     try {
-      const { data: tokenData,error: tokenError } = await authClient.token();
+      const { data: tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/admin/teachers/${deleteCandidate._id}`, {
         method: "DELETE",
         headers: { authorization: `Bearer ${tokenData?.token}` }
@@ -164,6 +176,7 @@ export default function ManageTeachersPage() {
     const matchesSearch = 
       teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.qualification?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.designation?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesSubject = selectedSubject === "All" || teacher.subject === selectedSubject;
@@ -197,7 +210,7 @@ export default function ManageTeachersPage() {
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40" size={18} />
           <input
             type="text"
-            placeholder="Search by name, email, designation..."
+            placeholder="Search by name, email, qualification..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="input input-bordered w-full pl-10 rounded-xl text-sm focus:outline-none focus:border-secondary"
@@ -242,8 +255,8 @@ export default function ManageTeachersPage() {
                 <tr>
                   <th>Faculty Info</th>
                   <th>Designation</th>
-                  <th>Subject</th>
-                  <th>Joined Date</th>
+                  <th>Subject & Qualification</th>
+                  <th>Contact</th>
                   <th className="text-right">Actions</th>
                 </tr>
               </thead>
@@ -264,17 +277,34 @@ export default function ManageTeachersPage() {
                       </div>
                     </td>
                     <td>
-                      <span className="badge badge-secondary badge-outline badge-sm font-semibold">
+                      <span className="badge badge-secondary badge-outline badge-sm font-semibold whitespace-nowrap">
                         {teacher.designation || "Teacher"}
                       </span>
                     </td>
                     <td>
-                      <span className="badge badge-ghost badge-sm font-medium">
-                        {teacher.subject || "General"}
-                      </span>
+                      <div className="flex flex-col items-start gap-1 py-1">
+                        <span className="badge badge-ghost badge-sm font-medium whitespace-nowrap">
+                          {teacher.subject || "General"}
+                        </span>
+                        {teacher.qualification && (
+                          <div className="text-[11px] text-base-content/70 flex items-center gap-1 font-normal">
+                            <FiAward size={13} className="text-secondary shrink-0" />
+                            <span className="truncate max-w-[180px]" title={teacher.qualification}>
+                              {teacher.qualification}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </td>
-                    <td className="text-xs text-base-content/60">
-                      {teacher.createdAt ? new Date(teacher.createdAt).toLocaleDateString() : "N/A"}
+                    <td className="text-xs text-base-content/70">
+                      {teacher.phone ? (
+                        <div className="flex items-center gap-1 font-medium whitespace-nowrap">
+                          <FiPhone size={12} className="text-secondary shrink-0" />
+                          <span>{teacher.phone}</span>
+                        </div>
+                      ) : (
+                        <span className="text-base-content/40">N/A</span>
+                      )}
                     </td>
                     <td className="text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -302,12 +332,14 @@ export default function ManageTeachersPage() {
         )}
       </div>
 
-      {/* --- ADD / EDIT TEACHER MODAL --- */}
+      {/* --- ADD / EDIT TEACHER MODAL (2-Column Optimized Layout) --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-base-100 rounded-2xl border border-base-300 w-full max-w-lg p-6 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-4 border-b border-base-200">
-              <h3 className="text-lg font-bold text-base-content flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-base-100 rounded-2xl border border-base-300 w-full max-w-lg p-5 sm:p-6 shadow-2xl relative my-auto max-h-[90vh] flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-base-200 shrink-0">
+              <h3 className="text-base sm:text-lg font-bold text-base-content flex items-center gap-2">
                 <FiUserCheck className="text-secondary" /> {isEditMode ? "Edit Faculty Details" : "Add New Teacher"}
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="btn btn-sm btn-circle btn-ghost">
@@ -315,10 +347,12 @@ export default function ManageTeachersPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4 overflow-y-auto pr-1">
               {formError && <div className="alert alert-error text-xs p-3 rounded-xl">{formError}</div>}
               {formSuccess && <div className="alert alert-success text-xs p-3 rounded-xl text-white">{formSuccess}</div>}
 
+              {/* Full Name */}
               <div>
                 <label className="text-xs font-semibold text-base-content/70 mb-1 block">Full Name</label>
                 <div className="relative">
@@ -335,6 +369,7 @@ export default function ManageTeachersPage() {
                 </div>
               </div>
 
+              {/* Email Address */}
               <div>
                 <label className="text-xs font-semibold text-base-content/70 mb-1 block">Email Address</label>
                 <div className="relative">
@@ -351,6 +386,7 @@ export default function ManageTeachersPage() {
                 </div>
               </div>
 
+              {/* Password */}
               {!isEditMode && (
                 <div>
                   <label className="text-xs font-semibold text-base-content/70 mb-1 block">Password</label>
@@ -369,6 +405,40 @@ export default function ManageTeachersPage() {
                 </div>
               )}
 
+              {/* Grid 1: Qualification & Phone Number */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Qualification</label>
+                  <div className="relative">
+                    <FiAward className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+                    <input
+                      type="text"
+                      name="qualification"
+                      placeholder="e.g. B.Sc (Hons), M.Sc"
+                      value={formData.qualification}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-secondary"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-base-content/70 mb-1 block">Phone Number</label>
+                  <div className="relative">
+                    <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+                    <input
+                      type="text"
+                      name="phone"
+                      placeholder="e.g. 01831562894"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full pl-9 rounded-xl text-sm focus:outline-none focus:border-secondary"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid 2: Designation & Subject */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-base-content/70 mb-1 block">Designation</label>
@@ -408,6 +478,7 @@ export default function ManageTeachersPage() {
                 </div>
               </div>
 
+              {/* Modal Actions */}
               <div className="pt-4 flex items-center justify-end gap-3 border-t border-base-200">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-ghost rounded-xl text-sm">
                   Cancel
@@ -419,8 +490,7 @@ export default function ManageTeachersPage() {
                     "Save Changes"
                   ) : (
                     "Create Teacher"
-                  )
-                  }
+                  )}
                 </button>
               </div>
             </form>
@@ -430,7 +500,7 @@ export default function ManageTeachersPage() {
 
       {/* --- CONFIRM DELETE MODAL --- */}
       {deleteCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
           <div className="bg-base-100 rounded-2xl border border-base-300 w-full max-w-sm p-6 shadow-2xl space-y-4">
             <h3 className="text-lg font-bold text-error flex items-center gap-2">
               <FiTrash2 /> Confirm Delete
