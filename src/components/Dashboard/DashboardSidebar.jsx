@@ -48,6 +48,7 @@ export default function DashboardSidebar({ children }) {
     { name: "Routine", href: "/dashboard/admin/routine", icon: FiClock },
     { name: "Attendance", href: "/dashboard/admin/attendance", icon: FiCalendar },
     { name: "Fees & Accounts", href: "/dashboard/admin/fees", icon: FiDollarSign },
+    { name: "Results", href: "/dashboard/admin/results", icon: FiAward },
     { name: "Notice Board", href: "/dashboard/admin/notices", icon: FiBell },
     { name: "Settings", href: "/dashboard/admin/settings", icon: FiSettings },
   ];
