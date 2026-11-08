@@ -147,7 +147,7 @@ export default function Footer() {
                 </li>
                 <li className="flex items-center gap-3">
                   <FiMail className="text-primary shrink-0" size={16} />
-                  <span>info@school.edu.bd</span>
+                  <span>info@schooldomain.edu.bd</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <FiClock className="text-primary mt-1 shrink-0" size={16} />
@@ -179,7 +179,7 @@ export default function Footer() {
                 প্রাইভেসি পলিসি
               </Link>
               <span>•</span>
-              <Link href="/terms-of-service" className="hover:text-primary transition-colors">
+              <Link href="/terms-and-conditions" className="hover:text-primary transition-colors">
                 শর্তাবলী
               </Link>
             </div>

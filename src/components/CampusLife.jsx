@@ -15,7 +15,7 @@ export default function CampusLife() {
       category: "sports",
       title: "Annual Sports Day Highlights",
       youtubeId: "JWd0eLAUPg8", 
-      thumbnail: "https://images.unsplash.com/photo-1526976668912-1a811878dd37?q=80&w=800&auto=format&fit=crop",
+      thumbnail: "https://i.ibb.co.com/wFpb3cL7/Tanjid-khan.jpg",
     },
     {
       id: 2,
