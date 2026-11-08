@@ -50,6 +50,7 @@ export default function DashboardSidebar({ children }) {
     { name: "Fees & Accounts", href: "/dashboard/admin/fees", icon: FiDollarSign },
     { name: "Results", href: "/dashboard/admin/results", icon: FiAward },
     { name: "Notice Board", href: "/dashboard/admin/notices", icon: FiBell },
+    { name: "Digital Library", href: "/dashboard/admin/library", icon: FiBookOpen },
     { name: "Settings", href: "/dashboard/admin/settings", icon: FiSettings },
   ];
 
