@@ -53,7 +53,7 @@ export default function Footer() {
               {/* Social Links */}
               <div className="flex items-center gap-3 pt-2">
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/share/1DScAghEqQ/"
                   target="_blank"
                   rel="noreferrer"
                   className="w-9 h-9 rounded-xl bg-base-200/80 hover:bg-primary hover:text-primary-content border border-base-content/10 flex items-center justify-center transition-all duration-300"
@@ -263,7 +263,7 @@ export default function Footer() {
                 <FaLinkedin size={16} />
               </a>
               <a
-                href="https://tanjidkhan.dev"
+                href="https://tanjid-portfolio-hazel.vercel.app/"
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-square btn-sm btn-ghost border border-base-content/10 rounded-xl"
