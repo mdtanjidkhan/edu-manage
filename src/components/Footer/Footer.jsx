@@ -115,7 +115,7 @@ export default function Footer() {
                   { name: "অনলাইন ভর্তি", path: "/admission" },
                   { name: "পরীক্ষার ফলাফল", path: "/results" },
                   { name: "স্টুডেন্ট পোর্টাল", path: "/login" },
-                  { name: "অনলাইন পেমেন্ট", path: "/payments" },
+                  { name: "অনলাইন পেমেন্ট", path: "/dashboard/student/fees" },
                   { name: "ডিজিটাল লাইব্রেরি", path: "/library" },
                 ].map((link, idx) => (
                   <li key={idx}>

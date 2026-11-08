@@ -4,14 +4,12 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { FiLock, FiKey } from "react-icons/fi";
-
+import { FiLock, FiKey, FiMail, FiArrowRight, FiArrowLeft, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Forgot password page theke email query param hisebe ashle oita read korbe
   const initialEmail = searchParams.get("email") || "";
 
   const [email, setEmail] = useState(initialEmail);
@@ -39,8 +37,7 @@ function ResetPasswordForm() {
         `${process.env.NEXT_PUBLIC_SERVER_SITE_URL}/api/auth/reset-password`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json",
-              },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp, newPassword }),
         }
       );
@@ -61,140 +58,148 @@ function ResetPasswordForm() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-base-100 rounded-2xl shadow-xl border border-base-300 p-8">
-        <div className="text-center mb-7">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content">
-            Reset Password
-          </h1>
-          <p className="text-sm text-base-content/60 mt-2">
-            Enter the 6-digit OTP sent to your email along with your new password.
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      {/* Background Glow Effect */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        {message && (
-          <div className="alert alert-success text-sm mb-4 rounded-xl">
-            <span>{message}</span>
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="alert alert-error text-sm mb-4 rounded-xl">
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleResetPassword} className="space-y-4">
-          {/* Email Input */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-medium">Email Address</span>
-            </label>
-            <input
-              type="email"
-              placeholder="name@school.com"
-              className="input input-bordered w-full focus:outline-primary"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+      {/* Card Wrapper with Gradient Border */}
+      <div className="relative w-full max-w-md p-[1.5px] rounded-3xl bg-gradient-to-b from-purple-500 via-indigo-500/30 to-blue-500/20 shadow-2xl shadow-purple-950/40 backdrop-blur-xl">
+        <div className="w-full bg-slate-900/90 rounded-[23px] px-6 py-6 space-y-4 relative overflow-hidden">
+          
+          {/* Header */}
+          <div className="text-center relative space-y-1">
+            <Link href="/" className="text-xl font-black tracking-tight text-white inline-block mb-0.5">
+              Edu<span className="text-purple-400">Manage</span>
+            </Link>
+            
+            <h1 className="text-2xl font-extrabold bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">
+              Reset Password
+            </h1>
+            <p className="text-[11px] text-slate-400 leading-relaxed px-4">
+              Enter the 6-digit OTP sent to your email along with your new password.
+            </p>
           </div>
 
-          {/* OTP Input */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-medium">6-Digit OTP</span>
-            </label>
-
-            <div className="relative">
-              <FiKey
-                className="absolute left-3.5 top-3.5 text-base-content/40 text-lg"
-                size={19}
-              />
-
-              <input
-                type="text"
-                maxLength={6}
-                placeholder="123456"
-                className="input input-bordered w-full pl-10 tracking-widest font-mono text-lg focus:outline-primary"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                required
-              />
+          {/* Success Alert */}
+          {message && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-xl text-xs flex items-center gap-2">
+              <FiCheckCircle className="text-base flex-shrink-0" />
+              <span>{message}</span>
             </div>
-          </div>
+          )}
 
-          {/* New Password */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-medium">New Password</span>
-            </label>
-
-            <div className="relative">
-              <FiLock
-                className="absolute left-3.5 top-3.5 text-base-content/40 text-lg"
-                size={19}
-              />
-
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="input input-bordered w-full pl-10 focus:outline-primary"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
+          {/* Error Alert */}
+          {errorMessage && (
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3 rounded-xl text-xs flex items-center gap-2">
+              <FiAlertCircle className="text-base flex-shrink-0" />
+              <span>{errorMessage}</span>
             </div>
-          </div>
+          )}
 
-          {/* Confirm Password */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-medium">
+          {/* Form */}
+          <form onSubmit={handleResetPassword} className="space-y-3">
+            
+            {/* Email Input */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-slate-300 block ml-1">
+                Email Address
+              </label>
+              <div className="relative flex items-center">
+                <FiMail className="absolute left-3.5 text-purple-400 text-base pointer-events-none" />
+                <input
+                  type="email"
+                  placeholder="name@school.com"
+                  className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition duration-200"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* OTP Input */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-slate-300 block ml-1">
+                6-Digit OTP
+              </label>
+              <div className="relative flex items-center">
+                <FiKey className="absolute left-3.5 text-purple-400 text-base pointer-events-none" />
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="123456"
+                  className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs tracking-widest font-mono text-purple-300 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition duration-200"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-slate-300 block ml-1">
+                New Password
+              </label>
+              <div className="relative flex items-center">
+                <FiLock className="absolute left-3.5 text-purple-400 text-base pointer-events-none" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition duration-200"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-slate-300 block ml-1">
                 Confirm Password
-              </span>
-            </label>
-
-            <div className="relative">
-              <FiLock
-                className="absolute left-3.5 top-3.5 text-base-content/40 text-lg"
-                size={19}
-              />
-
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="input input-bordered w-full pl-10 focus:outline-primary"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
+              </label>
+              <div className="relative flex items-center">
+                <FiLock className="absolute left-3.5 text-purple-400 text-base pointer-events-none" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition duration-200"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-2 px-4 rounded-xl shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.99] disabled:opacity-70 cursor-pointer text-xs"
+            >
+              {loading ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Resetting...</span>
+                </>
+              ) : (
+                <>
+                  <span>Reset Password</span>
+                  <FiArrowRight className="text-base" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="text-center text-xs text-slate-400 pt-1 border-t border-slate-800">
+            <Link href="/login" className="font-semibold text-purple-400 hover:text-purple-300 hover:underline inline-flex items-center gap-1 transition">
+              <FiArrowLeft className="text-xs" /> Back to Login
+            </Link>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary w-full font-semibold mt-2"
-          >
-            {loading ? (
-              <>
-                <span className="loading loading-spinner loading-sm" />
-                Resetting...
-              </>
-            ) : (
-              "Reset Password"
-            )}
-          </button>
-        </form>
-
-        <div className="text-center text-sm text-base-content/70 mt-7 pt-5 border-t border-base-200">
-          <Link
-            href="/login"
-            className="font-semibold text-primary hover:underline"
-          >
-            Back to Login
-          </Link>
         </div>
       </div>
     </div>
@@ -205,8 +210,8 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-base-200 flex items-center justify-center">
-          <span className="loading loading-spinner loading-lg" />
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+          <span className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >
